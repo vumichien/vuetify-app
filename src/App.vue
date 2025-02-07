@@ -1,6 +1,6 @@
 <template>
   <v-app @click="handleOutsideClick">
-    <!-- Hide app bar and navigation drawer on login page -->
+    <!-- Header chỉ hiển thị khi không phải trang login -->
     <template v-if="!isLoginPage">
       <v-app-bar app elevation="1" color="#1E2A38" dark height="64">
         <v-app-bar-nav-icon 
@@ -33,13 +33,21 @@
 
         <!-- Menu Items -->
         <v-list nav dense class="menu-items py-0">
+          <v-list-item to="/" exact class="menu-item">
+            <v-list-item-icon>
+              <v-icon color="#42b883">mdi-home</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>ホーム</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+
           <v-list-item to="/create" class="menu-item">
             <v-list-item-icon>
               <v-icon color="#42b883">mdi-plus-circle</v-icon>
             </v-list-item-icon>
             <v-list-item-content>
-              <v-list-item-title>自動化シナリオ作成</v-list-item-title>
-              <v-list-item-subtitle class="menu-subtitle">新規シナリオの作成</v-list-item-subtitle>
+              <v-list-item-title>シナリオ作成</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
 
@@ -48,8 +56,7 @@
               <v-icon color="#42b883">mdi-update</v-icon>
             </v-list-item-icon>
             <v-list-item-content>
-              <v-list-item-title>自動化シナリオ更新</v-list-item-title>
-              <v-list-item-subtitle class="menu-subtitle">既存シナリオの編集</v-list-item-subtitle>
+              <v-list-item-title>シナリオ更新</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
 
@@ -59,7 +66,6 @@
             </v-list-item-icon>
             <v-list-item-content>
               <v-list-item-title>マニュアル作成</v-list-item-title>
-              <v-list-item-subtitle class="menu-subtitle">手順書の自動生成</v-list-item-subtitle>
             </v-list-item-content>
           </v-list-item>
         </v-list>
@@ -74,7 +80,6 @@
               </v-list-item-avatar>
               <v-list-item-content class="user-info">
                 <v-list-item-title class="user-name">{{ userName }}</v-list-item-title>
-                <v-list-item-subtitle class="user-email">{{ userEmail }}</v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
             
@@ -93,7 +98,7 @@
       </v-navigation-drawer>
     </template>
 
-    <v-main>
+    <v-main :class="{ 'pa-0': isLoginPage }">
       <router-view></router-view>
     </v-main>
   </v-app>
@@ -129,7 +134,7 @@ export default {
   },
   computed: {
     isLoginPage() {
-      return this.$route.name === 'LoginPage';
+      return this.$route.name === 'Login'
     }
   },
   methods: {
