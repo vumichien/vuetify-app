@@ -17,6 +17,9 @@
             作成
         </v-btn>
 
+        <!-- AI Thinking Dialog -->
+        <AIThinking :show.sync="isThinking" />
+
         <!-- Scrollable container for groups -->
         <div class="groups-scroll-container" v-if="showSteps">
             <div class="groups-container">
@@ -58,10 +61,20 @@
         <!-- Manual Reference Dialog -->
         <v-dialog v-model="showManualDialog" max-width="600">
             <v-card>
-                <v-card-title class="headline">
-                    マニュアル参照情報
+                <v-card-title class="manual-dialog-header">
+                    <v-icon large color="white" class="mr-2">
+                        mdi-book-open-page-variant
+                    </v-icon>
+                    <span>マニュアル参照情報</span>
+                    <v-btn
+                        icon
+                        @click="showManualDialog = false"
+                        class="close-button"
+                    >
+                        <v-icon color="white">mdi-close</v-icon>
+                    </v-btn>
                 </v-card-title>
-                <v-card-text>
+                <v-card-text class="pt-4">
                     <div v-if="selectedManualRef" class="manual-info">
                         <p><strong>章：</strong> {{ selectedManualRef.chapter }}</p>
                         <p><strong>セクション：</strong> {{ selectedManualRef.section }}</p>
@@ -91,11 +104,13 @@
 <script>
 import FileUpload from '@/components/FileUpload.vue';
 import StepGroup from '@/components/StepGroup.vue';
+import AIThinking from '@/components/AIThinking.vue';
 
 export default {
     components: { 
         FileUpload,
-        StepGroup
+        StepGroup,
+        AIThinking
     },
     data() {
         return {
@@ -103,6 +118,7 @@ export default {
             showSteps: false,
             showManualDialog: false,
             selectedManualRef: null,
+            isThinking: false,
             scenarioGroups: [
                 {
                     name: 'Excel探す',
@@ -290,8 +306,15 @@ export default {
     },
 
     methods: {
-        createScenario() {
-            this.showSteps = true;
+        async createScenario() {
+            this.isThinking = true;
+            try {
+                // Giả lập thời gian xử lý AI
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                this.showSteps = true;
+            } finally {
+                this.isThinking = false;
+            }
         },
         showManualInfo(manualRef) {
             this.selectedManualRef = manualRef;
@@ -404,5 +427,26 @@ export default {
     content: "";
     display: block;
     margin-bottom: 8px;
+}
+
+.manual-dialog-header {
+    background-color: #1976D2;
+    color: white;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    font-size: 1.25rem;
+    position: relative;
+}
+
+.close-button {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.manual-info {
+    padding: 8px 0;
 }
 </style>
