@@ -5,7 +5,6 @@
             <v-col cols="12">
                 <div class="welcome-content text-center">
                     <h1 class="welcome-title mb-4">
-                        <v-icon large color="#42b883" class="mr-2">mdi-robot</v-icon>
                         自動化シナリオ生成システム
                     </h1>
                     <p class="welcome-subtitle">AIを活用した業務自動化の効率的な実現</p>
