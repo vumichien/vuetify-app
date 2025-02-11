@@ -20,15 +20,52 @@
         <!-- AI Thinking Dialog -->
         <AIThinking :show.sync="isThinking" />
 
+        <!-- Flow Title -->
+        <div v-if="showSteps" class="flow-title mb-4">
+            <h2 class="text-h5 font-weight-medium text-center">
+                {{ isAnalysisMode ? '分析後のフロー' : 'アップロードされたフロー' }}
+            </h2>
+        </div>
+
+        <!-- Analysis Legend -->
+        <div v-if="showSteps && isAnalysisMode" class="legend-container mb-4">
+            <div class="legend-title mb-2">操作の分析について</div>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <div class="legend-box gray-dot"></div>
+                    <span>繰り返しの操作（省略可能）</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box blue-fill"></div>
+                    <span>簡略化後の必要な操作</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box blue-norm"></div>
+                    <span>変更のない操作</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box orange-fill"></div>
+                    <span>確認操作</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box green-fill"></div>
+                    <span>処理時間改善のため自動化可能な操作</span>
+                </div>
+            </div>
+        </div>
+
         <!-- Scrollable container for groups -->
         <div class="groups-scroll-container" v-if="showSteps">
             <div class="groups-container">
-                <template v-for="(group, index) in scenarioGroups">
+                <template v-for="(group, index) in currentGroups">
                     <div :key="'group-wrapper-' + index" class="group-wrapper">
-                        <StepGroup
+                        <component
+                            :is="currentComponent"
                             :key="'group-' + index"
                             :group-name="group.name"
                             :steps="group.steps"
+                            :steps-style="isAnalysisMode ? group.stepsStyle : undefined"
+                            :step-comments="isAnalysisMode ? group.stepComments : undefined"
                         />
                         <v-tooltip bottom>
                             <template v-slot:activator="{ on, attrs }">
@@ -48,7 +85,7 @@
                         </v-tooltip>
                     </div>
                     <div 
-                        v-if="index < scenarioGroups.length - 1"
+                        v-if="index < currentGroups.length - 1"
                         :key="'connector-' + index"
                         class="group-connector"
                     >
@@ -56,6 +93,17 @@
                     </div>
                 </template>
             </div>
+        </div>
+
+        <!-- Analysis Button -->
+        <div v-if="showSteps" class="text-center mt-6">
+            <v-btn
+                color="primary"
+                @click="toggleAnalysis"
+                class="mb-6"
+            >
+                {{ isAnalysisMode ? '通常表示' : '分析' }}
+            </v-btn>
         </div>
 
         <!-- Manual Reference Dialog -->
@@ -104,13 +152,16 @@
 <script>
 import FileUpload from '@/components/FileUpload.vue';
 import StepGroup from '@/components/StepGroup.vue';
+import StepGroupAnalysis from '@/components/StepGroupAnalysis.vue';
 import AIThinking from '@/components/AIThinking.vue';
 import { scenarioGroups } from '@/data/scenarioGroups.js';
+import { scenarioAnalysis } from '@/data/scenarioAnalysis.js';
 
 export default {
     components: { 
         FileUpload,
         StepGroup,
+        StepGroupAnalysis,
         AIThinking
     },
     data() {
@@ -120,15 +171,25 @@ export default {
             showManualDialog: false,
             selectedManualRef: null,
             isThinking: false,
-            scenarioGroups: scenarioGroups
+            isAnalysisMode: false,
+            scenarioGroups: scenarioGroups,
+            scenarioAnalysis: scenarioAnalysis
         };
+    },
+
+    computed: {
+        currentGroups() {
+            return this.isAnalysisMode ? this.scenarioAnalysis : this.scenarioGroups;
+        },
+        currentComponent() {
+            return this.isAnalysisMode ? 'StepGroupAnalysis' : 'StepGroup';
+        }
     },
 
     methods: {
         async createScenario() {
             this.isThinking = true;
             try {
-                // Giả lập thời gian xử lý AI
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 this.showSteps = true;
             } finally {
@@ -138,6 +199,9 @@ export default {
         showManualInfo(manualRef) {
             this.selectedManualRef = manualRef;
             this.showManualDialog = true;
+        },
+        toggleAnalysis() {
+            this.isAnalysisMode = !this.isAnalysisMode;
         }
     }
 };
@@ -271,5 +335,70 @@ export default {
 
 .manual-info {
     padding: 8px 0;
+}
+
+.legend-container {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 0 auto;
+    max-width: 800px;
+}
+
+.legend-title {
+    font-weight: 500;
+    color: #2c3e50;
+    font-size: 1rem;
+}
+
+.legend-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.legend-box {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+/* Analysis styles */
+.legend-box.gray-dot {
+    background-color: #e0e0e0;
+    border: 2px dashed #1976D2;
+}
+
+.legend-box.blue-fill {
+    background-color: #E3F2FD;
+    border: 2px solid #1976D2;
+}
+
+.legend-box.blue-norm {
+    background-color: white;
+    border: 2px solid #1976D2;
+}
+
+.legend-box.orange-fill {
+    background-color: #FFF3E0;
+    border: 2px solid #FF9800;
+}
+
+.legend-box.green-fill {
+    background-color: #E8F5E9;
+    border: 2px solid #4CAF50;
+}
+
+.flow-title {
+    color: #2c3e50;
+    margin-top: 16px;
 }
 </style>
