@@ -58,7 +58,7 @@ export default {
             const percentage = document.querySelector('.percentage');
             let progress = 0;
             
-            // Clear any existing intervals/timeouts
+            // 既存のインターバル/タイムアウトをクリア
             if (this.progressInterval) clearInterval(this.progressInterval);
             if (this.closeTimeout) clearTimeout(this.closeTimeout);
             
@@ -86,7 +86,7 @@ export default {
         }
     },
     beforeDestroy() {
-        // Clean up intervals/timeouts when component is destroyed
+        // コンポーネントが破棄されるときにインターバル/タイムアウトをクリーンアップ
         if (this.progressInterval) clearInterval(this.progressInterval);
         if (this.closeTimeout) clearTimeout(this.closeTimeout);
     }

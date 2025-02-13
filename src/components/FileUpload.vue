@@ -22,7 +22,7 @@
       </template>
     </v-file-input>
 
-    <!-- Display uploaded files -->
+    <!-- アップロードされたファイルを表示 -->
     <v-list v-if="uploadedFiles.length > 0" dense>
       <v-subheader>アップロードされたファイル</v-subheader>
       <v-list-item v-for="(file, index) in uploadedFiles" :key="index">
@@ -56,7 +56,7 @@ export default {
     handleFiles(files) {
       if (files) {
         this.uploadedFiles = Array.isArray(files) ? files : [files];
-        // Emit the files to parent component if needed
+        // 必要に応じてファイルを親コンポーネントに送信
         this.$emit('files-selected', this.uploadedFiles);
       } else {
         this.uploadedFiles = [];

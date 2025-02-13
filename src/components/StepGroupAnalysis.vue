@@ -46,7 +46,7 @@
                     </div>
                 </div>
 
-                <!-- Time Comparison Dialog -->
+                <!-- 時間比較ダイアログ -->
                 <v-dialog
                     v-model="showComparison"
                     max-width="900"
@@ -122,17 +122,17 @@ export default {
 }
 
 .panel-content {
-    max-height: 1000px; /* Chiều cao cố định */
-    overflow: hidden; /* Ẩn overflow ban đầu */
+    max-height: 1000px; /* 固定高さ */
+    overflow: hidden; /* 初期オーバーフローを隠す */
 }
 
 .content-wrapper {
-    max-height: 800px; /* Để lại khoảng trống cho padding */
-    overflow-y: auto; /* Cho phép scroll theo chiều dọc */
+    max-height: 800px; /* パディングのための余白を残す */
+    overflow-y: auto; /* 垂直スクロールを許可 */
     padding: 16px;
 }
 
-/* Tùy chỉnh thanh scroll */
+/* スクロールバーのカスタマイズ */
 .content-wrapper::-webkit-scrollbar {
     width: 8px;
 }
@@ -211,7 +211,7 @@ export default {
     border-radius: 4px;
 }
 
-/* Analysis styles */
+/* 分析スタイル */
 .gray-dot {
     background-color: #e0e0e0;
     border: 2px dashed #1976D2;
@@ -245,7 +245,7 @@ export default {
     font-weight: 500;
 }
 
-/* Add styles for tooltip */
+/* ツールチップのスタイルを追加 */
 :deep(.v-tooltip__content) {
     background-color: rgba(97, 97, 97, 0.9) !important;
     font-size: 0.85rem !important;

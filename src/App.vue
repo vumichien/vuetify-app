@@ -1,6 +1,6 @@
 <template>
   <v-app @click="handleOutsideClick">
-    <!-- Header chỉ hiển thị khi không phải trang login -->
+    <!-- ログインページ以外でヘッダーを表示 -->
     <template v-if="!isLoginPage">
       <v-app-bar app elevation="1" color="#1E2A38" dark height="64">
         <v-app-bar-nav-icon 
@@ -117,17 +117,17 @@ export default {
   },
   created() {
     this.checkLoginStatus();
-    // Lắng nghe sự kiện login-success
+    // login-successイベントをリッスン
     this.$root.$on('login-success', () => {
       this.drawer = false;
     });
   },
   beforeDestroy() {
-    // Cleanup event listener
+    // イベントリスナーのクリーンアップ
     this.$root.$off('login-success');
   },
   watch: {
-    // Theo dõi thay đổi route để đóng sidebar
+    // サイドバーを閉じるためにルートの変更を監視する
     '$route'() {
       this.drawer = false;
     }
@@ -150,11 +150,11 @@ export default {
         this.$router.push('/login');
       }
       
-      // Đảm bảo drawer đóng khi kiểm tra trạng thái đăng nhập
+      // ログイン状態を確認するときにドロワーが閉じていることを確認する
       this.drawer = false;
     },
     logout() {
-      // Delete cookies by setting expiry to past date
+      // 有効期限を過去の日付に設定してクッキーを削除
       document.cookie = 'isLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
       document.cookie = 'userName=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
       
@@ -163,7 +163,7 @@ export default {
       this.$router.push('/login');
     },
     handleOutsideClick() {
-      // Implement the logic to close the drawer when clicking outside
+      // 外側をクリックしたときにドロワーを閉じるロジックを実装
     }
   }
 };

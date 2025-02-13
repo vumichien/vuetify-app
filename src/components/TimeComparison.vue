@@ -3,7 +3,7 @@
         <h3 class="text-h6 mb-4 text-center">操作時間の比較</h3>
         
         <div class="flows-container">
-            <!-- Normal Flow -->
+            <!-- 通常のフロー -->
             <div class="flow-column">
                 <div class="flow-header mb-4">
                     <div class="flow-title">① 一般ユーザ操作時間: {{ timeCalculations.normalTime }}秒</div>
@@ -25,7 +25,7 @@
                 </div>
             </div>
 
-            <!-- Automated Flow -->
+            <!-- 自動化されたフロー -->
             <div class="flow-column">
                 <div class="flow-header mb-4">
                     <div class="flow-title">② 自動化操作時間: {{ timeCalculations.automatedTime }}秒</div>
@@ -51,7 +51,7 @@
                 </div>
             </div>
 
-            <!-- Veteran Flow -->
+            <!-- ベテランのフロー -->
             <div class="flow-column">
                 <div class="flow-header mb-4">
                     <div class="flow-title">③ ベテランの操作時間: {{ timeCalculations.veteranTime }}秒</div>
@@ -80,7 +80,7 @@
             </div>
         </div>
 
-        <!-- Analysis Section -->
+        <!-- 分析セクション -->
         <div class="analysis-section mt-6">
             <div class="slider-settings mb-4">
                 <v-row align="center" justify="center">
@@ -584,7 +584,7 @@ export default {
     border-left: 4px solid #1976D2;
 }
 
-/* Add styles for the input fields */
+/* 入力フィールドのスタイルを追加 */
 :deep(.v-text-field.v-text-field--outlined .v-label) {
     font-size: 0.875rem;
 }

@@ -65,7 +65,7 @@ export default {
         document.cookie = `isLoggedIn=true; expires=${expiryDate.toUTCString()}; path=/`;
         document.cookie = `userName=admin; expires=${expiryDate.toUTCString()}; path=/`;
         
-        // Emit event để đóng sidebar
+        // イベントを発行してサイドバーを閉じる
         this.$root.$emit('login-success');
         
         this.$router.push('/');
@@ -125,4 +125,4 @@ export default {
   color: #ff5252;
   font-size: 0.8rem;
 }
-</style> 
+</style>

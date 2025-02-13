@@ -50,13 +50,13 @@ const router = new VueRouter({
 router.beforeEach((to, from, next) => {
   const isAuthenticated = document.cookie.includes("isLoggedIn=true");
 
-  // Nếu đang ở login page và đã authenticated, chuyển về home
+  // ログインページにいて認証されている場合、ホームにリダイレクト
   if (to.path === "/login" && isAuthenticated) {
     next("/");
     return;
   }
 
-  // Nếu route yêu cầu auth và chưa authenticated, chuyển về login
+  // ルートが認証を要求し、認証されていない場合、ログインにリダイレクト
   if (
     to.matched.some((record) => record.meta.requiresAuth) &&
     !isAuthenticated
@@ -65,7 +65,7 @@ router.beforeEach((to, from, next) => {
     return;
   }
 
-  // Các trường hợp còn lại cho phép đi tiếp
+  // その他のケースでは次へ進む
   next();
 });
 
