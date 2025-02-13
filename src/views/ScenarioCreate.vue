@@ -20,15 +20,52 @@
         <!-- AI Thinking Dialog -->
         <AIThinking :show.sync="isThinking" />
 
+        <!-- Flow Title -->
+        <div v-if="showSteps" class="flow-title mb-4">
+            <h2 class="text-h5 font-weight-medium text-center">
+                {{ isAnalysisMode ? '分析後のフロー' : 'アップロードされたフロー' }}
+            </h2>
+        </div>
+
+        <!-- Analysis Legend -->
+        <div v-if="showSteps && isAnalysisMode" class="legend-container mb-4">
+            <div class="legend-title mb-2">操作の分析について</div>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <div class="legend-box gray-dot"></div>
+                    <span>繰り返しの操作（省略可能）</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box blue-fill"></div>
+                    <span>簡略化後の必要な操作</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box blue-norm"></div>
+                    <span>変更のない操作</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box orange-fill"></div>
+                    <span>確認操作</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box green-fill"></div>
+                    <span>処理時間改善のため自動化可能な操作</span>
+                </div>
+            </div>
+        </div>
+
         <!-- Scrollable container for groups -->
         <div class="groups-scroll-container" v-if="showSteps">
             <div class="groups-container">
-                <template v-for="(group, index) in scenarioGroups">
+                <template v-for="(group, index) in currentGroups">
                     <div :key="'group-wrapper-' + index" class="group-wrapper">
-                        <StepGroup
+                        <component
+                            :is="currentComponent"
                             :key="'group-' + index"
                             :group-name="group.name"
                             :steps="group.steps"
+                            :steps-style="isAnalysisMode ? group.stepsStyle : undefined"
+                            :step-comments="isAnalysisMode ? group.stepComments : undefined"
                         />
                         <v-tooltip bottom>
                             <template v-slot:activator="{ on, attrs }">
@@ -48,7 +85,7 @@
                         </v-tooltip>
                     </div>
                     <div 
-                        v-if="index < scenarioGroups.length - 1"
+                        v-if="index < currentGroups.length - 1"
                         :key="'connector-' + index"
                         class="group-connector"
                     >
@@ -56,6 +93,17 @@
                     </div>
                 </template>
             </div>
+        </div>
+
+        <!-- Analysis Button -->
+        <div v-if="showSteps" class="text-center mt-6">
+            <v-btn
+                color="primary"
+                @click="toggleAnalysis"
+                class="mb-6"
+            >
+                {{ isAnalysisMode ? '通常表示' : '分析' }}
+            </v-btn>
         </div>
 
         <!-- Manual Reference Dialog -->
@@ -104,12 +152,16 @@
 <script>
 import FileUpload from '@/components/FileUpload.vue';
 import StepGroup from '@/components/StepGroup.vue';
+import StepGroupAnalysis from '@/components/StepGroupAnalysis.vue';
 import AIThinking from '@/components/AIThinking.vue';
+import { scenarioGroups } from '@/data/scenarioGroups.js';
+import { scenarioAnalysis } from '@/data/scenarioAnalysis.js';
 
 export default {
     components: { 
         FileUpload,
         StepGroup,
+        StepGroupAnalysis,
         AIThinking
     },
     data() {
@@ -119,197 +171,25 @@ export default {
             showManualDialog: false,
             selectedManualRef: null,
             isThinking: false,
-            scenarioGroups: [
-                {
-                    name: 'Excel探す',
-                    steps: [
-                        'エクスプローラでフォルダ遷移する',
-                        'エクスプローラでフォルダ遷移する',
-                        'エクスプローラでフォルダ遷移する',
-                        'Excelを開く',
-                        'Excelの中身を確認',
-                        'エクスプローラでフォルダ遷移する',
-                        'エクスプローラでフォルダ遷移する',
-                        'エクスプローラでフォルダ遷移する',
-                        'Excelを開く',
-                        '中身確認'
-                    ],
-                    manualRef: {
-                        chapter: '第3章：基本操作',
-                        section: '3.2 ファイル操作',
-                        item: 'Excelファイルの検索と確認',
-                        page: '25',
-                        content: `
-                        3.2.1 ファイル検索の基本手順<br>
-                        本手順では、エクスプローラーを使用したファイル検索の方法について説明します。以下の手順に従い、目的のファイルを効率的に検索してください。<br><br>
-                        1. エクスプローラーの起動<br>
-                        - Windowsキー + E を押してエクスプローラーを起動します。<br>
-                        - アドレスバーに直接パスを入力することで、目的のフォルダへ迅速に移動することも可能です。<br><br>
-                        2. フォルダ階層の移動<br>
-                        - 以下の順序でフォルダを開き、目的のファイルが格納されているフォルダへ移動します。<br>
-                        共有フォルダ<br>
-                        部署フォルダ<br>
-                        案件フォルダ<br><br>
-                        - パンくずリスト（アドレスバー）を確認し、現在のフォルダの位置を把握してください。<br><br>
-                        3. Excelファイルの確認ポイント<br>
-                        - 目的のファイルを見つけたら、以下の点を確認してください。<br>
-                        - ファイル名：命名規則に従っているか確認する。<br>
-                        - 最終更新日時：最新のファイルかどうか確認する。<br>
-                        - ファイルサイズ：異常に大きなファイルでないか確認する。<br><br>
-                        4. ファイル内容の確認<br>
-                        - ファイルの内容を確認する際は、以下の点に注意してください。<br>
-                        - ファイルを開く際は、読み取り専用 で開くことを推奨します。<br>
-                        - シート構成 を確認し、必要な情報が含まれているか確認してください。<br>
-                        - 基本情報（タイトル、作成者、データの正確性など）をチェックしてください。<br>
-                        `
-                    }
-                },
-                {
-                    name: '決裁システムを探す',
-                    steps: [
-                        'ブラウザを起動する',
-                        '社内サイトを起動する',
-                        '社内サイトを遷移してページのリンクを押す',
-                        '決裁システムかを確認する',
-                        '社内サイトを遷移してページのリンクを押す',
-                        '決裁システムかを確認する'
-                    ],
-                    manualRef: {
-                        chapter: '第4章：社内システム',
-                        section: '4.1 決裁システム',
-                        item: 'システムへのアクセス方法',
-                        page: '42',
-                        content: `
-                            4.1.1 決裁システムへのアクセス手順<br>
-                            本手順では、決裁システムへのアクセス方法について説明します。以下の手順に従い、安全かつ確実にシステムへアクセスしてください。<br><br>
-                            1. 社内ポータルサイトへのアクセス<br>
-                            - Internet Explorer を使用して社内ポータルサイトへアクセスしてください。<br>
-                            - ブックマークからアクセスすることを推奨します。<br><br>
-                            2. 認証とセキュリティ<br>
-                            - 社員番号とパスワードを使用して認証を行います。<br>
-                            - セキュリティトークンを確認し、適切に入力してください。<br><br>
-                            3. 決裁システムの特定<br>
-                            - 「業務システム」タブを選択します。<br>
-                            - 「決裁・承認」カテゴリを確認し、該当するシステムを探します。<br>
-                            - システムアイコンの視覚的特徴を確認し、正しいシステムを選択してください。<br><br>
-                            4. アクセス時の注意点<br>
-                            - 推奨ブラウザを使用し、適切な環境でアクセスしてください。<br>
-                            - ポップアップブロックの設定を確認し、必要に応じて解除してください。<br>
-                            - セッションタイムアウトに注意し、一定時間操作しない場合は再認証が必要となることを理解してください。<br><br>
-                            以上の手順に従い、決裁システムへ適切にアクセスしてください。<br>
-                        `
-                    }
-                },
-                {
-                    name: '新規起票ページを起こす',
-                    steps: [
-                        "システムにログインする",
-                        "システム内を遷移する",
-                        "システム内を遷移する",
-                        "システム内を遷移する",
-                        "新規起票のページを開く",
-                    ],
-                    manualRef: {
-                        chapter: '第4章：社内システム',
-                        section: '4.2 起票処理',
-                        item: '新規起票画面へのアクセス',
-                        page: '45',
-                        content: `
-                            4.2.1 新規起票の開始手順<br>
-                            本手順では、新規起票を開始する方法について説明します。以下の手順に従い、正しく起票を行ってください。<br><br>
-                            1. メインメニューからの遷移<br>
-                            - 「新規起票」ボタンの位置を確認し、クリックしてください。<br>
-                            - メニュー階層を理解し、適切な手順で遷移してください。<br><br>
-                            2. 起票種別の選択<br>
-                            - 申請種別の一覧から適切なものを選択してください。<br>
-                            - 各種別の特徴と用途を確認し、業務に合った種別を選択してください。<br>
-                            - 選択時に誤りがないよう、内容を再確認してください。<br><br>
-                            3. 画面構成の理解<br>
-                            - 必須項目を確認し、漏れなく入力してください。<br>
-                            - 入力フィールドの種類（テキスト入力、プルダウン選択など）を把握してください。<br>
-                            - 添付ファイルが必要な場合は、添付ファイル領域を活用してください。<br><br>
-                            4. 事前準備事項<br>
-                            - 起票に必要な情報を事前に確認してください。<br>
-                            - 関連資料がある場合は、事前に準備してください。<br>
-                            - 承認ルートを事前に確認し、適切なフローで進めてください。<br><br>
-                            以上の手順に従い、新規起票を正しく行ってください。<br>
-                        `
-                    }
-                },
-                {
-                    name: '新規起票ページに入力',
-                    steps: [
-                        "ブラウザを起動する",
-                        "社内サイトを起動する",
-                        "社内サイトを遷移してページのリンクを押す",
-                        "決裁システムかを確認する",
-                        "社内サイトを遷移してページのリンクを押す",
-                        "決裁システムかを確認する",
-                        "システムにログインする",
-                        "システム内を遷移する",
-                        "システム内を遷移する",
-                        "システム内を遷移する",
-                        "新規起票のページを開く",
-                        "GUI1の日付を選択",
-                        "GUI1の日付を選択",
-                        "ExcelからXXをコピー",
-                        "XXXをGUI2にペーストする",
-                        "Excelの○○からXXXをコピー",
-                        "XXXをGUI3にペーストする",
-                        "Excelの○○からXXXをコピー",
-                        "XXXをGUI3にペーストする",
-                        "GUI4を押下",
-                        "別画面からXXをキーワードに検索",
-                        "検索結果をGUI5に入力",
-                        "Excelの○○からXXXをコピー",
-                        "XXXをGUI6にペーストする",
-                        "GUI7をクリック",
-                        "別画面の確認画面",
-                        "入力内容の確認",
-                        "申請処理の通知",
-                        "システムを閉じる"
-                    ],
-                    manualRef: {
-                        chapter: '第4章：社内システム',
-                        section: '4.2 起票処理',
-                        item: '申請情報の入力と送信',
-                        page: '47',
-                        content: `
-                            4.2.2 申請情報の入力手順<br>
-                            本手順では、申請情報の入力方法について説明します。以下の手順に従い、正しく情報を入力してください。<br><br>
-                            1. 基本情報の入力<br>
-                            - 申請日をカレンダーから選択するか、手動で入力してください。<br>
-                            - 申請者情報が正しく反映されているか確認してください。<br>
-                            - 部署コードの入力規則に従い、正確に入力してください。<br><br>
-                            2. 申請内容の入力<br>
-                            - 件名は、簡潔かつ明確に記入してください。<br>
-                            - 金額入力時は、桁区切りや小数点の扱いに注意してください。<br>
-                            - 理由・目的は、具体的かつ分かりやすく記載してください。<br><br>
-                            3. 添付資料の準備<br>
-                            - 添付可能なファイル形式（PDF、Excel、Word など）を確認してください。<br>
-                            - ファイルサイズの制限を超えないように注意してください。<br>
-                            - 添付方法は、「ファイル選択」ボタンを使用し、指定の場所にアップロードしてください。<br><br>
-                            4. 承認ルートの設定<br>
-                            - 適切な承認者を選択し、ルートを設定してください。<br>
-                            - 承認者の決裁権限を事前に確認してください。<br>
-                            - ルートを変更する際は、影響範囲を考慮し、適切に修正してください。<br><br>
-                            5. 申請前の最終確認<br>
-                            - 入力内容に誤りがないか、最終確認を行ってください。<br>
-                            - システムのエラーチェック機能を活用し、入力ミスを防止してください。<br>
-                            - 必要に応じて、一時保存機能を使用し、後で修正・提出できるようにしてください。<br><br>
-                            以上の手順に従い、申請情報を正しく入力してください。<br>
-                        `
-                    }
-                }
-            ]
+            isAnalysisMode: false,
+            scenarioGroups: scenarioGroups,
+            scenarioAnalysis: scenarioAnalysis
         };
+    },
+
+    computed: {
+        currentGroups() {
+            return this.isAnalysisMode ? this.scenarioAnalysis : this.scenarioGroups;
+        },
+        currentComponent() {
+            return this.isAnalysisMode ? 'StepGroupAnalysis' : 'StepGroup';
+        }
     },
 
     methods: {
         async createScenario() {
             this.isThinking = true;
             try {
-                // Giả lập thời gian xử lý AI
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 this.showSteps = true;
             } finally {
@@ -319,6 +199,9 @@ export default {
         showManualInfo(manualRef) {
             this.selectedManualRef = manualRef;
             this.showManualDialog = true;
+        },
+        toggleAnalysis() {
+            this.isAnalysisMode = !this.isAnalysisMode;
         }
     }
 };
@@ -332,20 +215,21 @@ export default {
 }
 
 .groups-container {
-    display: inline-flex; /* Changed to inline-flex */
-    align-items: center;
-    justify-content: flex-start; /* Changed to flex-start */
+    display: inline-flex;
+    align-items: flex-start;
+    justify-content: flex-start;
     gap: 24px;
-    min-width: min-content; /* Ensures container fits all content */
-    padding: 0 20px; /* Add padding for better appearance */
+    min-width: min-content;
+    padding: 0 20px;
 }
 
 .group-connector {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     padding: 0 12px;
-    flex-shrink: 0; /* Prevents arrow from shrinking */
+    flex-shrink: 0;
+    margin-top: 18px;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
@@ -376,6 +260,9 @@ export default {
 }
 
 :deep(.v-expansion-panel-header) {
+    position: sticky;
+    top: 0;
+    z-index: 2;
     background-color: #f5f5f5;
 }
 
@@ -400,7 +287,7 @@ export default {
     position: absolute;
     top: 8px;
     right: 48px;
-    z-index: 1;
+    z-index: 3;
 }
 
 .manual-info p {
@@ -448,5 +335,70 @@ export default {
 
 .manual-info {
     padding: 8px 0;
+}
+
+.legend-container {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 0 auto;
+    max-width: 800px;
+}
+
+.legend-title {
+    font-weight: 500;
+    color: #2c3e50;
+    font-size: 1rem;
+}
+
+.legend-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.legend-box {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+/* Analysis styles */
+.legend-box.gray-dot {
+    background-color: #e0e0e0;
+    border: 2px dashed #1976D2;
+}
+
+.legend-box.blue-fill {
+    background-color: #E3F2FD;
+    border: 2px solid #1976D2;
+}
+
+.legend-box.blue-norm {
+    background-color: white;
+    border: 2px solid #1976D2;
+}
+
+.legend-box.orange-fill {
+    background-color: #FFF3E0;
+    border: 2px solid #FF9800;
+}
+
+.legend-box.green-fill {
+    background-color: #E8F5E9;
+    border: 2px solid #4CAF50;
+}
+
+.flow-title {
+    color: #2c3e50;
+    margin-top: 16px;
 }
 </style>
