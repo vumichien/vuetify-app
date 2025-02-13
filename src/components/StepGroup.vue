@@ -48,17 +48,17 @@ export default {
 }
 
 .panel-content {
-    max-height: 1000px; /* Chiều cao cố định */
-    overflow: hidden; /* Ẩn overflow ban đầu */
+    max-height: 1000px; /* 固定高さ */
+    overflow: hidden; /* 初期オーバーフローを隠す */
 }
 
 .content-wrapper {
-    max-height: 800px; /* Để lại khoảng trống cho padding */
-    overflow-y: auto; /* Cho phép scroll theo chiều dọc */
+    max-height: 800px; /* パディングのための余白を残す */
+    overflow-y: auto; /* 垂直スクロールを許可 */
     padding: 16px;
 }
 
-/* Tùy chỉnh thanh scroll */
+/* スクロールバーのカスタマイズ */
 .content-wrapper::-webkit-scrollbar {
     width: 8px;
 }
