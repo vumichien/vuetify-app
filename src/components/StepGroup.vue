@@ -4,18 +4,20 @@
             <v-expansion-panel-header class="title text-center">
                 {{ groupName }}
             </v-expansion-panel-header>
-            <v-expansion-panel-content>
-                <div class="flowchart">
-                    <div 
-                        v-for="(step, index) in steps" 
-                        :key="index"
-                        class="step-container"
-                    >
-                        <div class="step-box">
-                            {{ step }}
-                        </div>
-                        <div v-if="index < steps.length - 1" class="arrow">
-                            <v-icon>mdi-arrow-down</v-icon>
+            <v-expansion-panel-content class="panel-content">
+                <div class="content-wrapper">
+                    <div class="flowchart">
+                        <div 
+                            v-for="(step, index) in steps" 
+                            :key="index"
+                            class="step-container"
+                        >
+                            <div class="step-box">
+                                {{ step }}
+                            </div>
+                            <div v-if="index < steps.length - 1" class="arrow">
+                                <v-icon>mdi-arrow-down</v-icon>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -43,6 +45,36 @@ export default {
 <style scoped>
 .group-panel {
     width: 400px;
+}
+
+.panel-content {
+    max-height: 1000px; /* Chiều cao cố định */
+    overflow: hidden; /* Ẩn overflow ban đầu */
+}
+
+.content-wrapper {
+    max-height: 800px; /* Để lại khoảng trống cho padding */
+    overflow-y: auto; /* Cho phép scroll theo chiều dọc */
+    padding: 16px;
+}
+
+/* Tùy chỉnh thanh scroll */
+.content-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+
+.content-wrapper::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.content-wrapper::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.content-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #666;
 }
 
 .title {

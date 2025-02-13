@@ -37,6 +37,19 @@ export const scenarioAnalysis = [
             '重要な操作ステップ',
             '確認作業'
         ],
+        stepTimes: [
+            10,
+            10,
+            10,
+            5,
+            20,
+            10,
+            10,
+            10,
+            5,
+            20,
+            
+        ],
         manualRef: {
             chapter: '第3章：基本操作',
             section: '3.2 ファイル操作',
@@ -82,6 +95,7 @@ export const scenarioAnalysis = [
             'gray-dot',
             'gray-dot',
             'gray-dot',
+            'blue-fill',
             'orange-fill',
         ],
         stepComments: [
@@ -91,6 +105,14 @@ export const scenarioAnalysis = [
             '繰り返し操作が検出',
             '重要な操作ステップ',
             '確認作業'
+        ],
+        stepTimes: [
+            8,
+            10,
+            2,
+            20,
+            2,
+            20,
         ],
         manualRef: {
             chapter: '第4章：社内システム',
@@ -143,6 +165,14 @@ export const scenarioAnalysis = [
             '重要な操作ステップ',
             '重要な操作ステップ',
             '確認作業'
+        ],
+        stepTimes: [
+            10,
+            2,
+            2,
+            2,
+            5,
+            20,
         ],
         manualRef: {
             chapter: '第4章：社内システム',
@@ -232,6 +262,26 @@ export const scenarioAnalysis = [
             '確認作業',
             '重要な操作ステップ',
             '重要な操作ステップ',
+        ],
+        stepTimes: [
+            30,
+            30,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            8,
+            15,
+            20,
+            2,
+            5,
+            6,
+            2,
+            10,
+            5,
+            2
         ],
         manualRef: {
             chapter: '第4章：社内システム',
