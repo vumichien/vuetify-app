@@ -64,8 +64,9 @@
                             :key="'group-' + index"
                             :group-name="group.name"
                             :steps="group.steps"
-                            :steps-style="isAnalysisMode ? group.stepsStyle : undefined"
-                            :step-comments="isAnalysisMode ? group.stepComments : undefined"
+                            :steps-style="group.stepsStyle"
+                            :step-comments="group.stepComments"
+                            :step-times="group.stepTimes"
                         />
                         <v-tooltip bottom>
                             <template v-slot:activator="{ on, attrs }">

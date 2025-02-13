@@ -13,40 +13,84 @@
                     {{ groupName }}
                 </div>
             </v-expansion-panel-header>
-            <v-expansion-panel-content>
-                <div class="flowchart">
+            <v-expansion-panel-content class="panel-content">
+                <div class="content-wrapper">
                     <div 
-                        v-for="(step, index) in steps" 
-                        :key="index"
-                        class="step-container"
+                        class="flowchart clickable"
+                        @click="showComparison = true"
                     >
-                        <v-tooltip 
-                            right
-                            :open-delay="0"
+                        <div 
+                            v-for="(step, index) in steps" 
+                            :key="index"
+                            class="step-container"
                         >
-                            <template v-slot:activator="{ on, attrs }">
-                                <div 
-                                    :class="['step-box', stepsStyle[index]]"
-                                    v-bind="attrs"
-                                    v-on="on"
-                                >
-                                    {{ step }}
-                                </div>
-                            </template>
-                            <span>{{ stepComments[index] }}</span>
-                        </v-tooltip>
-                        <div v-if="index < steps.length - 1" class="arrow">
-                            <v-icon>mdi-arrow-down</v-icon>
+                            <v-tooltip 
+                                right
+                                :open-delay="0"
+                            >
+                                <template v-slot:activator="{ on, attrs }">
+                                    <div 
+                                        :class="['step-box', stepsStyle[index]]"
+                                        v-bind="attrs"
+                                        v-on="on"
+                                    >
+                                        {{ step }}
+                                    </div>
+                                </template>
+                                <span>{{ stepComments[index] }}</span>
+                            </v-tooltip>
+                            <div v-if="index < steps.length - 1" class="arrow">
+                                <v-icon>mdi-arrow-down</v-icon>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Time Comparison Dialog -->
+                <v-dialog
+                    v-model="showComparison"
+                    max-width="900"
+                >
+                    <v-card>
+                        <v-card-title class="headline">
+                            時間分析
+                        </v-card-title>
+                        <v-card-text>
+                            <TimeComparison 
+                                :steps="steps"
+                                :steps-style="stepsStyle"
+                                :step-times="stepTimes"
+                            />
+                        </v-card-text>
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn
+                                color="primary"
+                                text
+                                @click="showComparison = false"
+                            >
+                                閉じる
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
             </v-expansion-panel-content>
         </v-expansion-panel>
     </v-expansion-panels>
 </template>
 
 <script>
+import TimeComparison from './TimeComparison.vue';
+
 export default {
+    components: {
+        TimeComparison
+    },
+    data() {
+        return {
+            showComparison: false
+        };
+    },
     props: {
         groupName: {
             type: String,
@@ -63,14 +107,48 @@ export default {
         stepComments: {
             type: Array,
             required: true
+        },
+        stepTimes: {
+            type: Array,
+            required: true
         }
     }
-}
+};
 </script>
 
 <style scoped>
 .group-panel {
     width: 400px;
+}
+
+.panel-content {
+    max-height: 1000px; /* Chiều cao cố định */
+    overflow: hidden; /* Ẩn overflow ban đầu */
+}
+
+.content-wrapper {
+    max-height: 800px; /* Để lại khoảng trống cho padding */
+    overflow-y: auto; /* Cho phép scroll theo chiều dọc */
+    padding: 16px;
+}
+
+/* Tùy chỉnh thanh scroll */
+.content-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+
+.content-wrapper::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.content-wrapper::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.content-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #666;
 }
 
 .title {
@@ -121,6 +199,16 @@ export default {
     align-items: center;
     justify-content: center;
     color: #1976D2;
+}
+
+.clickable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.clickable:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 4px;
 }
 
 /* Analysis styles */
