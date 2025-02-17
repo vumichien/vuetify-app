@@ -7,62 +7,72 @@
             </v-card-title>
 
             <v-card-text class="pa-6">
-                <!-- Flow Summary -->
-                <div class="flow-summary mb-4">
-                    <v-chip class="mr-4" :color="getTitleColor" outlined>
-                        <v-icon left>mdi-clock-outline</v-icon>
-                        合計時間: {{ flowData?.totalTime || 0 }}秒
-                    </v-chip>
-                    <v-chip class="mr-4" :color="getTitleColor" outlined>
-                        <v-icon left>mdi-format-list-numbered</v-icon>
-                        ステップ数: {{ flowData?.totalSteps || 0 }}
-                    </v-chip>
-                </div>
+                <!-- Flow Summary - Only show if restoring state -->
+                <template v-if="restoreState">
+                    <div class="flow-summary mb-4">
+                        <v-chip class="mr-4" :color="getTitleColor" outlined>
+                            <v-icon left>mdi-clock-outline</v-icon>
+                            合計時間: {{ flowData?.totalTime || 0 }}秒
+                        </v-chip>
+                        <v-chip class="mr-4" :color="getTitleColor" outlined>
+                            <v-icon left>mdi-format-list-numbered</v-icon>
+                            ステップ数: {{ flowData?.totalSteps || 0 }}
+                        </v-chip>
+                    </div>
 
-                <!-- Flow Steps -->
-                <v-expansion-panels>
-                    <v-expansion-panel>
-                        <v-expansion-panel-header>
-                            <div class="d-flex align-center">
-                                <v-icon left :color="getTitleColor">mdi-format-list-checks</v-icon>
-                                フロー詳細
-                            </div>
-                        </v-expansion-panel-header>
-                        <v-expansion-panel-content>
-                            <v-timeline dense>
-                                <v-timeline-item
-                                    v-for="(step, index) in flowData?.steps"
-                                    :key="index"
-                                    :color="getTitleColor"
-                                    small
-                                >
-                                    <div class="d-flex justify-space-between align-center">
-                                        <div>
-                                            <strong>ステップ {{ index + 1 }}</strong>
-                                            <div>{{ step }}</div>
-                                        </div>
-                                        <v-chip x-small outlined :color="getTitleColor">
-                                            {{ flowData.stepTimes[index] }}秒
-                                        </v-chip>
-                                    </div>
-                                </v-timeline-item>
-                            </v-timeline>
-                        </v-expansion-panel-content>
-                    </v-expansion-panel>
-                </v-expansion-panels>
+                    <!-- Flow Steps -->
+                    <v-expansion-panels>
+                        <v-expansion-panel>
+                            <v-expansion-panel-header>
+                                <div class="d-flex align-center">
+                                    <v-icon left :color="getTitleColor">mdi-format-list-checks</v-icon>
+                                    フロー詳細
+                                </div>
+                            </v-expansion-panel-header>
+                            <v-expansion-panel-content>
+                                <div class="timeline-container">
+                                    <v-timeline dense>
+                                        <v-timeline-item
+                                            v-for="(step, index) in flowData?.steps"
+                                            :key="index"
+                                            :color="getTitleColor"
+                                            small
+                                        >
+                                            <div class="d-flex justify-space-between align-center">
+                                                <div class="step-content">
+                                                    <strong class="text-subtitle-1">ステップ {{ index + 1 }}</strong>
+                                                    <div class="text-body-1 mt-1">{{ step }}</div>
+                                                </div>
+                                                <v-chip 
+                                                    medium 
+                                                    outlined 
+                                                    :color="getTitleColor"
+                                                    class="time-chip"
+                                                >
+                                                    <span class="text-h6">{{ flowData.stepTimes[index] }}</span>
+                                                    <span class="text-caption ml-1">秒</span>
+                                                </v-chip>
+                                            </div>
+                                        </v-timeline-item>
+                                    </v-timeline>
+                                </div>
+                            </v-expansion-panel-content>
+                        </v-expansion-panel>
+                    </v-expansion-panels>
+                </template>
 
-                <v-divider class="my-6"></v-divider>
-
-                <!-- Manual Content -->
-                <v-text-field
-                    label="マニュアルの内容を入力してください"
-                    v-model="manualContent"
-                    outlined
-                    multi-line
-                    rows="4"
-                ></v-text-field>
-                
-                <FileUpload class="mt-4" />
+                <!-- Manual Content - Only show if not restoring state -->
+                <template v-if="!restoreState">
+                    <v-text-field
+                        label="マニュアルの内容を入力してください"
+                        v-model="manualContent"
+                        outlined
+                        multi-line
+                        rows="4"
+                    ></v-text-field>
+                    
+                    <FileUpload class="mt-4" />
+                </template>
             </v-card-text>
             
             <v-card-actions class="pa-6">
@@ -76,11 +86,11 @@
                 </v-btn>
                 <v-btn
                     color="primary"
-                    @click="saveManual"
+                    @click="createManual"
                     :loading="saving"
                 >
-                    <v-icon left>mdi-content-save</v-icon>
-                    保存
+                    <v-icon left>mdi-file-document-plus</v-icon>
+                    作成
                 </v-btn>
             </v-card-actions>
         </v-card>
@@ -157,14 +167,19 @@ export default {
                 this.$router.go(-1);
             }
         },
-        saveManual() {
-            // TODO: Implement manual saving logic
-            console.log('Saving manual:', {
+        createManual() {
+            this.saving = true;
+            console.log('Creating manual:', {
                 type: this.flowData.type,
                 content: this.manualContent,
                 flowSteps: this.flowData.steps,
                 stepTimes: this.flowData.stepTimes
             });
+            // TODO: Implement manual creation logic
+            setTimeout(() => {
+                this.saving = false;
+                // TODO: Handle success/error
+            }, 1000);
         }
     }
 };
@@ -182,13 +197,33 @@ export default {
     gap: 8px;
 }
 
+.timeline-container {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 16px;
+}
+
+.step-content {
+    flex: 1;
+    margin-right: 16px;
+}
+
+.time-chip {
+    min-width: 80px;
+    justify-content: center;
+}
+
 .v-timeline-item {
-    margin-bottom: 16px;
+    margin-bottom: 24px;
 }
 
 @media (max-width: 600px) {
     .flow-summary {
         flex-direction: column;
+    }
+    
+    .time-chip {
+        margin-top: 8px;
     }
 }
 </style>
