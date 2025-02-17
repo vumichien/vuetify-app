@@ -6,7 +6,12 @@
             v-model="text"
             class="mb-4"
         ></v-text-field>
-        <FileUpload class="mb-4"/>
+        <FileUpload 
+            ref="fileUpload"
+            :initial-files="initialFiles"
+            @files-selected="handleFilesSelected"
+            class="mb-4"
+        />
         
         <v-btn
             color="#42b883"
@@ -159,6 +164,7 @@ import { scenarioGroups } from '@/data/scenarioGroups.js';
 import { scenarioAnalysis } from '@/data/scenarioAnalysis.js';
 
 export default {
+    name: 'ScenarioCreate',
     components: { 
         FileUpload,
         StepGroup,
@@ -168,6 +174,8 @@ export default {
     data() {
         return {
             text: '',
+            initialFiles: [],
+            currentFiles: [],
             showSteps: false,
             showManualDialog: false,
             selectedManualRef: null,
@@ -187,6 +195,69 @@ export default {
         }
     },
 
+    created() {
+        console.log('ScenarioCreate - Component created');
+        if (this.$route.params.restoreState) {
+            try {
+                const state = JSON.parse(decodeURIComponent(this.$route.params.restoreState));
+                console.log('ScenarioCreate - Restoring state:', state);
+                
+                if (state.text) {
+                    this.text = state.text;
+                }
+                
+                if (state.files && state.files.length > 0) {
+                    console.log('ScenarioCreate - Restoring files:', state.files);
+                    // Convert base64 back to File objects
+                    const fileObjects = state.files.map(fileData => {
+                        // Convert base64 to blob
+                        const byteString = atob(fileData.data.split(',')[1]);
+                        const ab = new ArrayBuffer(byteString.length);
+                        const ia = new Uint8Array(ab);
+                        for (let i = 0; i < byteString.length; i++) {
+                            ia[i] = byteString.charCodeAt(i);
+                        }
+                        const blob = new Blob([ab], { type: fileData.type });
+                        
+                        return new File([blob], fileData.name, {
+                            type: fileData.type,
+                            lastModified: fileData.lastModified
+                        });
+                    });
+                    
+                    this.initialFiles = fileObjects;
+                    this.currentFiles = fileObjects;
+                    console.log('ScenarioCreate - Files restored:', this.initialFiles);
+                }
+                
+                if (state.isAnalysisMode) {
+                    this.isAnalysisMode = state.isAnalysisMode;
+                    this.showSteps = true;
+                }
+            } catch (error) {
+                console.error('Error restoring state:', error);
+            }
+        }
+    },
+
+    mounted() {
+        console.log('ScenarioCreate - Component mounted', {
+            text: this.text,
+            initialFiles: this.initialFiles,
+            currentFiles: this.currentFiles,
+            refs: this.$refs
+        });
+    },
+
+    updated() {
+        console.log('ScenarioCreate - Component updated', {
+            text: this.text,
+            initialFiles: this.initialFiles,
+            currentFiles: this.currentFiles,
+            refs: this.$refs
+        });
+    },
+
     methods: {
         async createScenario() {
             this.isThinking = true;
@@ -203,6 +274,31 @@ export default {
         },
         toggleAnalysis() {
             this.isAnalysisMode = !this.isAnalysisMode;
+        },
+        expandAnalysis() {
+            // Method to expand the analysis panel
+            // Implementation depends on your component structure
+        },
+        handleFilesSelected(files) {
+            console.log('ScenarioCreate - Files selected:', files);
+            this.currentFiles = files;
+        }
+    },
+    watch: {
+        text(newVal) {
+            console.log('ScenarioCreate - Text changed:', newVal);
+        },
+        currentFiles: {
+            handler(newVal) {
+                console.log('ScenarioCreate - Current files changed:', 
+                    newVal.map(file => ({
+                        name: file.name,
+                        size: file.size,
+                        type: file.type
+                    }))
+                );
+            },
+            deep: true
         }
     }
 };

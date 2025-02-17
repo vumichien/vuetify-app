@@ -2,145 +2,145 @@
     <v-card class="time-comparison pa-4">
         <h3 class="text-h6 mb-4 text-center">操作時間の比較</h3>
         
-        <div class="flows-container">
-            <!-- 通常のフロー -->
-            <div class="flow-column">
-                <div class="flow-header mb-4">
-                    <div class="flow-title">① 一般ユーザ操作時間: {{ timeCalculations.normalTime }}秒</div>
-                </div>
-                <div class="flowchart">
-                    <div 
-                        v-for="(step, index) in steps" 
-                        :key="`normal-${index}`"
-                        class="step-container"
-                    >
-                        <div class="step-box">
-                            {{ step }}
-                            <div class="step-time">{{ stepTimes[index] }}秒</div>
-                        </div>
-                        <div v-if="index < steps.length - 1" class="arrow">
-                            <v-icon>mdi-arrow-down</v-icon>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 自動化されたフロー -->
-            <div class="flow-column">
-                <div class="flow-header mb-4">
-                    <div class="flow-title">② 自動化操作時間: {{ timeCalculations.automatedTime }}秒</div>
-                </div>
-                <div class="flowchart">
-                    <div 
-                        v-for="(step, index) in steps" 
-                        :key="`automated-${index}`"
-                        class="step-container"
-                    >
-                        <div 
-                            class="step-box"
-                            :class="{ 'step-skipped': stepsStyle[index] === 'gray-dot' }"
-                        >
-                            {{ step }}
-                            <div class="step-time" v-if="stepsStyle[index] !== 'gray-dot'">{{ stepTimes[index] }}秒</div>
-                            <div class="step-skip" v-else>省略</div>
-                        </div>
-                        <div v-if="index < steps.length - 1" class="arrow">
-                            <v-icon>mdi-arrow-down</v-icon>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ベテランのフロー -->
-            <div class="flow-column">
-                <div class="flow-header mb-4">
-                    <div class="flow-title">③ ベテランの操作時間: {{ timeCalculations.veteranTime }}秒</div>
-                </div>
-                <div class="flowchart">
-                    <div 
-                        v-for="(step, index) in steps" 
-                        :key="`veteran-${index}`"
-                        class="step-container"
-                    >
-                        <div 
-                            class="step-box"
-                            :class="{ 
-                                'step-skipped': stepsStyle[index] === 'gray-dot' && !isFirstGrayDot(index)
-                            }"
-                        >
-                            {{ step }}
-                            <div class="step-time" v-if="stepsStyle[index] !== 'gray-dot' || isFirstGrayDot(index)">{{ stepTimes[index] }}秒</div>
-                            <div class="step-skip" v-else>省略</div>
-                        </div>
-                        <div v-if="index < steps.length - 1" class="arrow">
-                            <v-icon>mdi-arrow-down</v-icon>
-                        </div>
-                    </div>
-                </div>
+        <!-- Bar Chart Section -->
+        <div class="chart-section mb-4">
+            <div class="chart-container">
+                <TimeBarChart
+                    :normal-time="timeCalculations.normalTime"
+                    :automated-time="timeCalculations.automatedTime"
+                    :veteran-time="timeCalculations.veteranTime"
+                />
             </div>
         </div>
 
+        <!-- Toggle Flowchart Button -->
+        <div class="text-center mb-4">
+            <v-btn
+                elevation="2"
+                :color="showFlowchart ? 'primary' : 'grey lighten-1'"
+                @click="showFlowchart = !showFlowchart"
+                class="toggle-flow-btn"
+            >
+                <v-icon left>
+                    {{ showFlowchart ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                </v-icon>
+                <span class="font-weight-medium">
+                    {{ showFlowchart ? 'フローを隠す' : 'フローを表示' }}
+                </span>
+            </v-btn>
+        </div>
+
+        <!-- Flowchart Section -->
+        <v-expand-transition>
+            <div v-show="showFlowchart" class="flows-container mb-4">
+                <!-- 通常のフロー -->
+                <div class="flow-column">
+                    <div class="flow-header mb-4">
+                        <div class="flow-title">①一般ユーザ操作時間: {{ timeCalculations.normalTime }}秒</div>
+                    </div>
+                    <div class="flowchart">
+                        <div 
+                            v-for="(step, index) in steps" 
+                            :key="`normal-${index}`"
+                            class="step-container"
+                        >
+                            <div class="step-box">
+                                {{ step }}
+                                <div class="step-time">{{ stepTimes[index] }}秒</div>
+                            </div>
+                            <div v-if="index < steps.length - 1" class="arrow">
+                                <v-icon>mdi-arrow-down</v-icon>
+                            </div>
+                        </div>
+                        <div class="step-container">
+                            <v-btn
+                                color="primary"
+                                class="manual-button"
+                                @click="createManual('normal')"
+                            >
+                                <v-icon left>mdi-file-document-outline</v-icon>
+                                マニュアル作成
+                            </v-btn>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 自動化されたフロー -->
+                <div class="flow-column">
+                    <div class="flow-header mb-4">
+                        <div class="flow-title">②自動化操作時間: {{ timeCalculations.automatedTime }}秒</div>
+                    </div>
+                    <div class="flowchart">
+                        <div 
+                            v-for="(step, index) in steps" 
+                            :key="`automated-${index}`"
+                            class="step-container"
+                        >
+                            <div 
+                                class="step-box"
+                                :class="{ 'step-skipped': stepsStyle[index] === 'gray-dot' }"
+                            >
+                                {{ step }}
+                                <div class="step-time" v-if="stepsStyle[index] !== 'gray-dot'">{{ stepTimes[index] }}秒</div>
+                                <div class="step-skip" v-else>省略</div>
+                            </div>
+                            <div v-if="index < steps.length - 1" class="arrow">
+                                <v-icon>mdi-arrow-down</v-icon>
+                            </div>
+                        </div>
+                        <div class="step-container">
+                            <v-btn
+                                color="success"
+                                class="manual-button"
+                                @click="createManual('automated')"
+                            >
+                                <v-icon left>mdi-file-document-outline</v-icon>
+                                マニュアル作成
+                            </v-btn>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ベテランのフロー -->
+                <div class="flow-column">
+                    <div class="flow-header mb-4">
+                        <div class="flow-title">③ベテランの操作時間: {{ timeCalculations.veteranTime }}秒</div>
+                    </div>
+                    <div class="flowchart">
+                        <div 
+                            v-for="(step, index) in steps" 
+                            :key="`veteran-${index}`"
+                            class="step-container"
+                        >
+                            <div 
+                                class="step-box"
+                                :class="{ 'step-skipped': stepsStyle[index] === 'gray-dot' && !isFirstGrayDot(index) }"
+                            >
+                                {{ step }}
+                                <div class="step-time" v-if="stepsStyle[index] !== 'gray-dot' || isFirstGrayDot(index)">{{ stepTimes[index] }}秒</div>
+                                <div class="step-skip" v-else>省略</div>
+                            </div>
+                            <div v-if="index < steps.length - 1" class="arrow">
+                                <v-icon>mdi-arrow-down</v-icon>
+                            </div>
+                        </div>
+                        <div class="step-container">
+                            <v-btn
+                                color="warning"
+                                class="manual-button"
+                                @click="createManual('veteran')"
+                            >
+                                <v-icon left>mdi-file-document-outline</v-icon>
+                                マニュアル作成
+                            </v-btn>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </v-expand-transition>
+
         <!-- 分析セクション -->
         <div class="analysis-section mt-6">
-            <div class="slider-settings mb-4">
-                <v-row align="center" justify="center">
-                    <v-col cols="12" sm="6" md="4">
-                        <v-text-field
-                            v-model.number="sliderMin"
-                            label="最小値"
-                            type="number"
-                            min="0"
-                            :max="sliderMax"
-                            @input="updateSliderRange"
-                            dense
-                            outlined
-                        ></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="4">
-                        <v-text-field
-                            v-model.number="sliderMax"
-                            label="最大値"
-                            type="number"
-                            :min="sliderMin"
-                            @input="updateSliderRange"
-                            dense
-                            outlined
-                        ></v-text-field>
-                    </v-col>
-                </v-row>
-            </div>
-
-            <div class="slider-container mb-4">
-                <div class="slider-label mb-2">誤差ε: {{ epsilon }}秒</div>
-                <v-slider
-                    v-model="epsilon"
-                    :min="sliderMin"
-                    :max="sliderMax"
-                    step="5"
-                    thumb-label
-                    class="align-center"
-                >
-                    <template v-slot:prepend>
-                        <v-btn
-                            icon
-                            small
-                            @click="decrementEpsilon"
-                        >
-                            <v-icon>mdi-minus</v-icon>
-                        </v-btn>
-                    </template>
-                    <template v-slot:append>
-                        <v-btn
-                            icon
-                            small
-                            @click="incrementEpsilon"
-                        >
-                            <v-icon>mdi-plus</v-icon>
-                        </v-btn>
-                    </template>
-                </v-slider>
-            </div>
-
             <div class="time-gaps mb-4">
                 <div class="gap-item">
                     <div class="gap-label">①-②の差分:</div>
@@ -166,25 +166,25 @@
                 <div class="result-label mb-2">分析結果:</div>
                 <div class="results-container">
                     <div 
-                        v-if="normalAutomatedGap >= epsilon || veteranAutomatedGap >= epsilon"
+                        v-if="normalAutomatedGap >= EPSILON || veteranAutomatedGap >= EPSILON"
                         class="result-content result-normal-automated mb-2"
                     >
                         自動化を提案
                     </div>
                     <div 
-                        v-if="normalVeteranGap >= epsilon"
+                        v-if="normalVeteranGap >= EPSILON"
                         class="result-content result-normal-veteran mb-2"
                     >
                         自動化の前にまずはベテランのノウハウ引継ぎを提案
                     </div>
                     <div 
-                        v-if="normalAutomatedGap < -epsilon || veteranAutomatedGap < -epsilon"
+                        v-if="normalAutomatedGap < -EPSILON || veteranAutomatedGap < -EPSILON"
                         class="result-content result-warning mb-2"
                     >
                         自動化より早い．確認処理の短縮化など別のノウハウの可能性があり．要ヒアリング
                     </div>
                     <div 
-                        v-if="normalVeteranGap < -epsilon"
+                        v-if="normalVeteranGap < -EPSILON"
                         class="result-content result-warning mb-2"
                     >
                         このユーザが新たなスーパーマンの可能性がある．または操作の漏れがある可能性がある
@@ -202,7 +202,14 @@
 </template>
 
 <script>
+import TimeBarChart from './TimeBarChart.vue'
+
+const EPSILON = 30; // 誤差の閾値（秒）
+
 export default {
+    components: {
+        TimeBarChart
+    },
     name: 'TimeComparison',
     props: {
         steps: {
@@ -220,9 +227,8 @@ export default {
     },
     data() {
         return {
-            epsilon: 30,
-            sliderMin: 10,
-            sliderMax: 100
+            showFlowchart: false,
+            EPSILON // constant を data に追加
         };
     },
     computed: {
@@ -262,11 +268,20 @@ export default {
         },
         hasAnyResult() {
             return (
-                (this.normalAutomatedGap >= this.epsilon || this.veteranAutomatedGap >= this.epsilon) ||
-                this.normalVeteranGap >= this.epsilon ||
-                (this.normalAutomatedGap < -this.epsilon || this.veteranAutomatedGap < -this.epsilon) ||
-                this.normalVeteranGap < -this.epsilon
+                (this.normalAutomatedGap >= this.EPSILON || this.veteranAutomatedGap >= this.EPSILON) ||
+                this.normalVeteranGap >= this.EPSILON ||
+                (this.normalAutomatedGap < -this.EPSILON || this.veteranAutomatedGap < -this.EPSILON) ||
+                this.normalVeteranGap < -this.EPSILON
             );
+        },
+        yAxisValues() {
+            const maxTime = Math.max(
+                this.timeCalculations.normalTime,
+                this.timeCalculations.automatedTime,
+                this.timeCalculations.veteranTime
+            );
+            const step = Math.ceil(maxTime / 5); // 5 divisions
+            return Array.from({ length: 6 }, (_, i) => step * (5 - i)); // Reverse order for top-to-bottom
         }
     },
     methods: {
@@ -277,7 +292,7 @@ export default {
             return grayDotIndices.length > 0 && grayDotIndices[0] === index;
         },
         getGapClass(gap, type) {
-            if (Math.abs(gap) < this.epsilon) return 'gap-normal';
+            if (Math.abs(gap) < this.EPSILON) return 'gap-normal';
             
             switch(type) {
                 case 'normal-automated':
@@ -290,24 +305,90 @@ export default {
                     return 'gap-normal';
             }
         },
-        incrementEpsilon() {
-            if (this.epsilon < this.sliderMax) {
-                this.epsilon = Math.min(this.epsilon + 5, this.sliderMax);
-            }
+        getNormalizedHeight(value) {
+            const maxValue = Math.max(...this.yAxisValues);
+            return (value / maxValue) * 80; // 80% of container height
         },
-        decrementEpsilon() {
-            if (this.epsilon > this.sliderMin) {
-                this.epsilon = Math.max(this.epsilon - 5, this.sliderMin);
-            }
-        },
-        updateSliderRange() {
-            // Ensure min is not greater than max
-            if (this.sliderMin > this.sliderMax) {
-                this.sliderMax = this.sliderMin;
+        async createManual(type) {
+            // Filter out skipped steps
+            const activeSteps = this.steps.filter((_, index) => {
+                if (type === 'automated') {
+                    return this.stepsStyle[index] !== 'gray-dot';
+                }
+                if (type === 'veteran') {
+                    return this.stepsStyle[index] !== 'gray-dot' || this.isFirstGrayDot(index);
+                }
+                return true;
+            });
+
+            const activeStepTimes = this.stepTimes.filter((_, index) => {
+                if (type === 'automated') {
+                    return this.stepsStyle[index] !== 'gray-dot';
+                }
+                if (type === 'veteran') {
+                    return this.stepsStyle[index] !== 'gray-dot' || this.isFirstGrayDot(index);
+                }
+                return true;
+            });
+
+            const flowData = {
+                type,
+                steps: activeSteps,
+                stepTimes: activeStepTimes,
+                totalTime: this.timeCalculations[`${type}Time`],
+                totalSteps: activeSteps.length
+            };
+            
+            // Tìm ScenarioCreate component
+            let scenarioCreateComponent = this.$parent;
+            while (scenarioCreateComponent && scenarioCreateComponent.$options.name !== 'ScenarioCreate') {
+                scenarioCreateComponent = scenarioCreateComponent.$parent;
             }
             
-            // Ensure epsilon stays within new range
-            this.epsilon = Math.max(this.sliderMin, Math.min(this.epsilon, this.sliderMax));
+            if (!scenarioCreateComponent) {
+                console.error('Could not find ScenarioCreate component');
+                return;
+            }
+
+            // Convert files to base64
+            const files = await Promise.all(
+                scenarioCreateComponent.currentFiles.map(file => 
+                    new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                            resolve({
+                                name: file.name,
+                                size: file.size,
+                                type: file.type,
+                                lastModified: file.lastModified,
+                                data: reader.result
+                            });
+                        };
+                        reader.onerror = reject;
+                        reader.readAsDataURL(file);
+                    })
+                )
+            );
+
+            const currentState = {
+                text: scenarioCreateComponent.text,
+                files: files,
+                showSteps: true,
+                isAnalysisMode: true
+            };
+
+            // Encode state as URI component
+            const encodedState = encodeURIComponent(JSON.stringify(currentState));
+            
+            console.log('TimeComparison - Saving state:', currentState);
+            
+            this.$router.push({
+                name: 'Manual',
+                params: { 
+                    flowData: JSON.stringify(flowData),
+                    restoreState: encodedState
+                }
+            });
         }
     }
 };
@@ -330,6 +411,7 @@ export default {
     width: calc((100% - 64px) / 3);
     min-width: 0;
     max-width: none;
+    padding-bottom: 20px;
 }
 
 .flow-header {
@@ -591,5 +673,87 @@ export default {
 
 :deep(.v-text-field.v-text-field--outlined.v-input--dense .v-label) {
     top: 0px;
+}
+
+.chart-section {
+    padding: 20px;
+}
+
+.chart-container {
+    height: 300px;
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+}
+
+/* Smooth transition for flowchart */
+.flows-container {
+    transition: all 0.3s ease;
+}
+
+.manual-button {
+    width: 90%;
+    height: 56px;
+    margin: 6px 0;
+    color: white !important;
+    font-weight: 500;
+}
+
+/* Normal Flow */
+.flow-column:nth-child(1) .manual-button {
+    background-color: #1976D2 !important;
+}
+
+/* Automated Flow */
+.flow-column:nth-child(2) .manual-button {
+    background-color: #4CAF50 !important;
+}
+
+/* Veteran Flow */
+.flow-column:nth-child(3) .manual-button {
+    background-color: #FF9800 !important;
+}
+
+.manual-button:hover {
+    opacity: 0.9;
+}
+
+/* Remove old button container styles */
+.manual-button-container {
+    display: none;
+}
+
+.toggle-flow-btn {
+    min-width: 160px;
+    height: 40px;
+    border-radius: 20px;
+    text-transform: none;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-flow-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.toggle-flow-btn .v-icon {
+    margin-right: 4px;
+    transition: transform 0.3s ease;
+}
+
+.toggle-flow-btn:hover .v-icon {
+    transform: translateY(showFlowchart ? -2px : 2px);
+}
+
+/* Thêm animation cho icon */
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(3px); }
+}
+
+.toggle-flow-btn:not(:hover) .v-icon {
+    animation: bounce 2s infinite;
 }
 </style> 
