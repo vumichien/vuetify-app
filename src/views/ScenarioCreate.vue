@@ -315,16 +315,15 @@ export default {
     display: inline-flex;
     align-items: flex-start;
     justify-content: flex-start;
-    gap: 24px;
+    gap: 12px; 
     min-width: min-content;
-    padding: 0 20px;
+    padding: 0 12px;
 }
 
 .group-connector {
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding: 0 12px;
     flex-shrink: 0;
     margin-top: 18px;
 }
@@ -378,6 +377,7 @@ export default {
 
 .group-wrapper {
     position: relative;
+    max-width: 380px;
 }
 
 .info-button {
