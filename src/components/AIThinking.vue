@@ -217,7 +217,7 @@ export default {
     letter-spacing: 0.5px;
     display: flex;
     align-items: center;
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Meiryo';
 }
 
 .dots {

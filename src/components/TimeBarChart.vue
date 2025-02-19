@@ -9,8 +9,9 @@
 <script>
 import { Bar } from 'vue-chartjs'
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
+import ChartDataLabels from 'chartjs-plugin-datalabels'
 
-ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ChartDataLabels)
 
 export default {
   name: 'TimeBarChart',
@@ -52,16 +53,22 @@ export default {
             display: false
           },
           tooltip: {
-            callbacks: {
-              label: function(context) {
-                return context.raw + '秒';
-              }
+            enabled: false  // Disable tooltips since we're showing values
+          },
+          datalabels: {
+            anchor: 'end',
+            align: 'top',
+            offset: 4,
+            color: function(context) {
+              return context.dataset.borderColor[context.dataIndex];
             },
-            titleFont: {
-              family: "'Roboto', sans-serif"
+            font: {
+              weight: 'bold',
+              size: 16,
+              family: "'Meiryo'"
             },
-            bodyFont: {
-              family: "'Roboto', sans-serif"
+            formatter: function(value) {
+              return value + '秒';
             }
           }
         },
@@ -74,13 +81,13 @@ export default {
               font: {
                 size: 14,
                 weight: 'bold',
-                family: "'Roboto', sans-serif"
+                family: "'Meiryo'"
               }
             },
             ticks: {
               font: {
                 size: 12,
-                family: "'Roboto', sans-serif"
+                family: "'Meiryo'"
               },
               callback: function(value) {
                 return value + '秒';
@@ -92,13 +99,10 @@ export default {
               font: {
                 size: 12,
                 weight: 'bold',
-                family: "'Roboto', sans-serif"
+                family: "'Meiryo'"
               }
             }
           }
-        },
-        font: {
-          family: "'Roboto', sans-serif"
         }
       }
     }

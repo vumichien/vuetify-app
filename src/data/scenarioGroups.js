@@ -1,6 +1,6 @@
 export const scenarioGroups = [
     {
-        name: 'Excel探す',
+        name: 'Excel検索',
         steps: [
             'エクスプローラでフォルダ遷移する',
             'エクスプローラでフォルダ遷移する',
@@ -44,7 +44,7 @@ export const scenarioGroups = [
         }
     },
     {
-        name: '決裁システムを探す',
+        name: '決裁システム検索',
         steps: [
             'ブラウザを起動する',
             '社内サイトを起動する',
@@ -80,7 +80,7 @@ export const scenarioGroups = [
         }
     },
     {
-        name: '新規起票ページを起こす',
+        name: '新規起票作成',
         steps: [
             "システムにログインする",
             "システム内を遷移する",
@@ -116,7 +116,7 @@ export const scenarioGroups = [
         }
     },
     {
-        name: '新規起票ページに入力',
+        name: '新規起票入力',
         steps: [
             "GUI1の日付を選択",
             "GUI1の日付を選択",
