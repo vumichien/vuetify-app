@@ -123,6 +123,9 @@
             </v-btn>
         </div>
 
+        <!-- Flow Analysis Table -->
+        <FlowAnalysisTable v-if="showSteps && isAnalysisMode" />
+
         <!-- Manual Reference Dialog -->
         <v-dialog v-model="showManualDialog" max-width="600">
             <v-card>
@@ -171,6 +174,7 @@ import FileUpload from '@/components/FileUpload.vue';
 import StepGroup from '@/components/StepGroup.vue';
 import StepGroupAnalysis from '@/components/StepGroupAnalysis.vue';
 import AIThinking from '@/components/AIThinking.vue';
+import FlowAnalysisTable from '@/components/FlowAnalysisTable.vue';
 import { scenarioGroups } from '@/data/scenarioGroups.js';
 import { scenarioAnalysis } from '@/data/scenarioAnalysis.js';
 
@@ -180,7 +184,8 @@ export default {
         FileUpload,
         StepGroup,
         StepGroupAnalysis,
-        AIThinking
+        AIThinking,
+        FlowAnalysisTable
     },
     data() {
         return {
@@ -327,7 +332,7 @@ export default {
             });
 
             const flowData = {
-                type: 'veteran',
+                type: 'default',
                 groups: veteranGroups,
                 totalTime: totalTime,
                 totalSteps: totalSteps
