@@ -106,9 +106,20 @@
             <v-btn
                 color="primary"
                 @click="toggleAnalysis"
-                class="mb-6"
+                class="mb-6 mr-4"
             >
                 {{ isAnalysisMode ? '通常表示' : '分析' }}
+            </v-btn>
+
+            <!-- Only show manual creation button when not in analysis mode -->
+            <v-btn
+                v-if="isAnalysisMode"
+                color="warning"
+                @click="createVeteranManual"
+                class="mb-6"
+            >
+                <v-icon left>mdi-file-document-outline</v-icon>
+                マニュアル作成
             </v-btn>
         </div>
 
@@ -282,6 +293,72 @@ export default {
         handleFilesSelected(files) {
             console.log('ScenarioCreate - Files selected:', files);
             this.currentFiles = files;
+        },
+        createVeteranManual() {
+            // Collect all veteran steps from all groups with group information
+            const veteranGroups = [];
+            let totalTime = 0;
+            let totalSteps = 0;
+
+            this.currentGroups.forEach(group => {
+                const groupSteps = [];
+                const groupStepTimes = [];
+                
+                group.steps.forEach((step, index) => {
+                    const isGrayDot = group.stepsStyle[index] === 'gray-dot';
+                    const isFirstGrayDot = isGrayDot && 
+                        group.stepsStyle.findIndex(style => style === 'gray-dot') === index;
+                    
+                    if (!isGrayDot || isFirstGrayDot) {
+                        groupSteps.push(step);
+                        groupStepTimes.push(group.stepTimes[index]);
+                        totalTime += group.stepTimes[index];
+                        totalSteps++;
+                    }
+                });
+
+                if (groupSteps.length > 0) {
+                    veteranGroups.push({
+                        name: group.name,
+                        steps: groupSteps,
+                        stepTimes: groupStepTimes
+                    });
+                }
+            });
+
+            const flowData = {
+                type: 'veteran',
+                groups: veteranGroups,
+                totalTime: totalTime,
+                totalSteps: totalSteps
+            };
+
+            // Save current state
+            const currentState = {
+                text: this.text,
+                files: this.currentFiles.map(file => ({
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    lastModified: file.lastModified,
+                    // Convert file to base64
+                    data: URL.createObjectURL(file)
+                })),
+                showSteps: true,
+                isAnalysisMode: this.isAnalysisMode
+            };
+
+            // Encode state as URI component
+            const encodedState = encodeURIComponent(JSON.stringify(currentState));
+
+            // Navigate to Manual Create view
+            this.$router.push({
+                name: 'Manual',
+                params: {
+                    flowData: JSON.stringify(flowData),
+                    restoreState: encodedState
+                }
+            });
         }
     },
     watch: {

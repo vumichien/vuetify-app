@@ -52,16 +52,6 @@
                                 <v-icon>mdi-arrow-down</v-icon>
                             </div>
                         </div>
-                        <div class="step-container">
-                            <v-btn
-                                color="primary"
-                                class="manual-button"
-                                @click="createManual('normal')"
-                            >
-                                <v-icon left>mdi-file-document-outline</v-icon>
-                                マニュアル作成
-                            </v-btn>
-                        </div>
                     </div>
                 </div>
 
@@ -88,16 +78,6 @@
                                 <v-icon>mdi-arrow-down</v-icon>
                             </div>
                         </div>
-                        <div class="step-container">
-                            <v-btn
-                                color="success"
-                                class="manual-button"
-                                @click="createManual('automated')"
-                            >
-                                <v-icon left>mdi-file-document-outline</v-icon>
-                                マニュアル作成
-                            </v-btn>
-                        </div>
                     </div>
                 </div>
 
@@ -123,16 +103,6 @@
                             <div v-if="index < steps.length - 1" class="arrow">
                                 <v-icon>mdi-arrow-down</v-icon>
                             </div>
-                        </div>
-                        <div class="step-container">
-                            <v-btn
-                                color="warning"
-                                class="manual-button"
-                                @click="createManual('veteran')"
-                            >
-                                <v-icon left>mdi-file-document-outline</v-icon>
-                                マニュアル作成
-                            </v-btn>
                         </div>
                     </div>
                 </div>
