@@ -96,15 +96,15 @@
                                         outlined
                                         dense
                                     ></v-text-field>
-                                    <v-textarea
-                                        v-model="group.content"
-                                        label="内容"
-                                        outlined
-                                        auto-grow
-                                        rows="5"
-                                        hint="Markdown形式で入力できます"
-                                        persistent-hint
-                                    ></v-textarea>
+                                    
+                                    <!-- Replace v-textarea with quill editor -->
+                                    <div class="editor-container">
+                                        <quill-editor
+                                            v-model="group.content"
+                                            :options="editorOption"
+                                            @ready="onEditorReady($event)"
+                                        />
+                                    </div>
                                     <v-divider class="my-4"></v-divider>
                                 </div>
                             </template>
@@ -154,12 +154,15 @@ import FileUpload from '@/components/FileUpload.vue';
 import ManualViewer from '@/components/ManualViewer.vue';
 import { marked } from 'marked';
 import { manualContent } from '@/data/manualContent';
+import 'quill/dist/quill.snow.css';
+import { quillEditor } from 'vue-quill-editor';
 
 export default {
     name: 'ManualCreate',
     components: { 
         FileUpload,
-        ManualViewer 
+        ManualViewer,
+        quillEditor
     },
     data() {
         return {
@@ -168,8 +171,21 @@ export default {
             saving: false,
             restoreState: null,
             isEditing: false,
-            manualGroups: [], // Will store editable manual content
-            title: 'マニュアル作成'
+            manualGroups: [],
+            title: 'マニュアル作成',
+            editorOption: {
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline', 'strike'],
+                        ['blockquote', 'code-block'],
+                        [{ 'header': 1 }, { 'header': 2 }],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'indent': '-1'}, { 'indent': '+1' }],
+                        ['clean']
+                    ]
+                },
+                placeholder: '内容を入力してください...'
+            }
         };
     },
     computed: {
@@ -214,23 +230,21 @@ export default {
         }
     },
     created() {
+        // Convert markdown to HTML for editor
         this.manualGroups = manualContent.groups.map((group, index) => ({
             id: this.generateId(group.name || 'group', index),
             name: group.name,
-            content: group.content
+            content: this.markdownToHtml(group.content)
         }));
 
-        // Parse flow data
         if (this.$route.params.flowData) {
             try {
                 this.flowData = JSON.parse(this.$route.params.flowData);
-                console.log('ManualCreate - Parsed flow data:', this.flowData);
             } catch (e) {
                 console.error('Failed to parse flow data:', e);
             }
         }
 
-        // Parse restore state
         if (this.$route.params.restoreState) {
             this.restoreState = this.$route.params.restoreState;
         }
@@ -290,6 +304,13 @@ ${group.steps.map((step, index) => `${index + 1}. ${step} (${group.stepTimes[ind
                 this.saving = false;
             }
         },
+        markdownToHtml(markdown) {
+            return marked(markdown);
+        },
+        onEditorReady(editor) {
+            // You can do something when editor is ready
+            console.log('Editor is ready!', editor);
+        },
         generateHTML() {
             const template = `
 <!DOCTYPE html>
@@ -297,7 +318,7 @@ ${group.steps.map((step, index) => `${index + 1}. ${step} (${group.stepTimes[ind
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${manualContent.title}</title>
+    <title>${this.title}</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -332,12 +353,12 @@ ${group.steps.map((step, index) => `${index + 1}. ${step} (${group.stepTimes[ind
     </style>
 </head>
 <body>
-    <h1 class="manual-title">${manualContent.title}</h1>
+    <h1 class="manual-title">${this.title}</h1>
     ${this.manualGroups.map(group => `
         <div class="group-section">
             <h2 class="group-title">${group.name}</h2>
             <div class="content">
-                ${marked(group.content)}
+                ${group.content}
             </div>
         </div>
     `).join('')}
@@ -415,5 +436,18 @@ ${group.steps.map((step, index) => `${index + 1}. ${step} (${group.stepTimes[ind
     padding: 16px 8px;
     background-color: #fff;
     border-radius: 4px;
+}
+
+.editor-container {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.editor-container >>> .ql-container {
+    height: 200px;
+}
+
+.editor-container >>> .ql-toolbar {
+    background-color: #f5f5f5;
 }
 </style>
