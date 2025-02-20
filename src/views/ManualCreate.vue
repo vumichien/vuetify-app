@@ -89,7 +89,7 @@
                         </v-card-title>
                         <v-card-text>
                             <template v-if="isEditing">
-                                <div v-for="(group, index) in manualGroups" :key="index" class="mb-6">
+                                <div v-for="group in manualGroups" :key="group.id" class="mb-6">
                                     <v-text-field
                                         v-model="group.name"
                                         label="グループ名"
@@ -102,6 +102,8 @@
                                         outlined
                                         auto-grow
                                         rows="5"
+                                        hint="Markdown形式で入力できます"
+                                        persistent-hint
                                     ></v-textarea>
                                     <v-divider class="my-4"></v-divider>
                                 </div>
@@ -212,20 +214,17 @@ export default {
         }
     },
     created() {
+        this.manualGroups = manualContent.groups.map((group, index) => ({
+            id: this.generateId(group.name || 'group', index),
+            name: group.name,
+            content: group.content
+        }));
+
         // Parse flow data
         if (this.$route.params.flowData) {
             try {
                 this.flowData = JSON.parse(this.$route.params.flowData);
                 console.log('ManualCreate - Parsed flow data:', this.flowData);
-                
-                // Initialize manual groups from flowData
-                if (this.flowData.groups) {
-                    this.manualGroups = this.flowData.groups.map((group, index) => ({
-                        id: this.generateId(group.name || 'group', index),           
-                        name: group.name,
-                        content: this.generateInitialContent(group)
-                    }));
-                }
             } catch (e) {
                 console.error('Failed to parse flow data:', e);
             }
