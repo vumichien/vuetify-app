@@ -135,36 +135,87 @@
             <div class="analysis-result">
                 <div class="result-label mb-2">分析結果:</div>
                 <div class="results-container">
-                    <div 
-                        v-if="normalAutomatedGap >= EPSILON || veteranAutomatedGap >= EPSILON"
-                        class="result-content result-normal-automated mb-2"
-                    >
-                        自動化を提案
-                    </div>
-                    <div 
-                        v-if="normalVeteranGap >= EPSILON"
-                        class="result-content result-normal-veteran mb-2"
-                    >
-                        自動化の前にまずはベテランのノウハウ引継ぎを提案
-                    </div>
-                    <div 
-                        v-if="normalAutomatedGap < -EPSILON || veteranAutomatedGap < -EPSILON"
-                        class="result-content result-warning mb-2"
-                    >
-                        自動化より早い．確認処理の短縮化など別のノウハウの可能性があり．要ヒアリング
-                    </div>
-                    <div 
-                        v-if="normalVeteranGap < -EPSILON"
-                        class="result-content result-warning mb-2"
-                    >
-                        このユーザが新たなスーパーマンの可能性がある．または操作の漏れがある可能性がある
-                    </div>
-                    <div 
-                        v-if="!hasAnyResult"
-                        class="result-content result-normal"
-                    >
-                        現状の処理フローで改善提案できません
-                    </div>
+                    <v-expansion-panels v-model="openPanels" multiple>
+                        <!-- 自動化を提案 -->
+                        <v-expansion-panel
+                            v-if="normalAutomatedGap >= EPSILON || veteranAutomatedGap >= EPSILON"
+                        >
+                            <v-expansion-panel-header class="result-header automation-header">
+                                自動化を提案
+                            </v-expansion-panel-header>
+                            <v-expansion-panel-content>
+                                <div class="proposal-content">
+                                    <div v-for="(item, index) in automationProposals" :key="index">
+                                        • {{ item }}
+                                    </div>
+                                </div>
+                            </v-expansion-panel-content>
+                        </v-expansion-panel>
+
+                        <!-- ベテランのノウハウ引継ぎを提案 -->
+                        <v-expansion-panel
+                            v-if="normalVeteranGap >= EPSILON"
+                        >
+                            <v-expansion-panel-header class="result-header veteran-header">
+                                自動化の前にまずはベテランのノウハウ引継ぎを提案
+                            </v-expansion-panel-header>
+                            <v-expansion-panel-content>
+                                <div class="proposal-content">
+                                    <div v-for="(item, index) in veteranProposals" :key="index">
+                                        • {{ item }}
+                                    </div>
+                                </div>
+                            </v-expansion-panel-content>
+                        </v-expansion-panel>
+
+                        <!-- 自動化より早い -->
+                        <v-expansion-panel
+                            v-if="normalAutomatedGap < -EPSILON || veteranAutomatedGap < -EPSILON"
+                        >
+                            <v-expansion-panel-header class="result-header warning-header">
+                                自動化より早い．確認処理の短縮化など別のノウハウの可能性があり．要ヒアリング
+                            </v-expansion-panel-header>
+                            <v-expansion-panel-content>
+                                <div class="proposal-content">
+                                    <div v-for="(item, index) in fasterThanAutomationProposals" :key="index">
+                                        • {{ item }}
+                                    </div>
+                                </div>
+                            </v-expansion-panel-content>
+                        </v-expansion-panel>
+
+                        <!-- スーパーマンの可能性 -->
+                        <v-expansion-panel
+                            v-if="normalVeteranGap < -EPSILON"
+                        >
+                            <v-expansion-panel-header class="result-header warning-header">
+                                このユーザが新たなスーパーマンの可能性がある．または操作の漏れがある可能性がある
+                            </v-expansion-panel-header>
+                            <v-expansion-panel-content>
+                                <div class="proposal-content">
+                                    <div v-for="(item, index) in superUserProposals" :key="index">
+                                        • {{ item }}
+                                    </div>
+                                </div>
+                            </v-expansion-panel-content>
+                        </v-expansion-panel>
+
+                        <!-- 改善提案なし -->
+                        <v-expansion-panel
+                            v-if="!hasAnyResult"
+                        >
+                            <v-expansion-panel-header class="result-header normal-header">
+                                現状の処理フローで改善提案できません
+                            </v-expansion-panel-header>
+                            <v-expansion-panel-content>
+                                <div class="proposal-content">
+                                    <div v-for="(item, index) in noImprovementProposals" :key="index">
+                                        • {{ item }}
+                                    </div>
+                                </div>
+                            </v-expansion-panel-content>
+                        </v-expansion-panel>
+                    </v-expansion-panels>
                 </div>
             </div>
         </div>
@@ -173,15 +224,17 @@
 
 <script>
 import TimeBarChart from './TimeBarChart.vue'
-
-const EPSILON = 30; // 誤差の閾値（秒）
+import { scenarioAnalysis } from '@/data/scenarioAnalysis'
 
 export default {
     components: {
         TimeBarChart
     },
-    name: 'TimeComparison',
     props: {
+        groupName: {
+            type: String,
+            required: true
+        },
         steps: {
             type: Array,
             required: true
@@ -193,15 +246,52 @@ export default {
         stepTimes: {
             type: Array,
             required: true
+        },
+        totalSteps: {
+            type: Number,
+            default: 0
+        },
+        totalTime: {
+            type: Number,
+            default: 0
         }
     },
+
     data() {
         return {
             showFlowchart: false,
-            EPSILON // constant を data に追加
+            EPSILON: 0.1,
+            openPanels: [0, 1, 2, 3, 4], // All panels open by default
         };
     },
+
     computed: {
+        currentGroup() {
+            return scenarioAnalysis.find(group => group.name === this.groupName);
+        },
+
+        automationProposals() {
+            console.log('automationProposals', this.currentGroup.automationProposal);
+            return this.currentGroup?.automationProposal || [];
+        },
+
+        veteranProposals() {
+            return this.currentGroup?.veteranProposals || [];
+        },
+
+        noImprovementProposals() {
+            return this.currentGroup?.noImprovementProposals || [];
+        },
+
+        hasAnyResult() {
+            return this.normalAutomatedGap >= this.EPSILON || 
+                   this.veteranAutomatedGap >= this.EPSILON || 
+                   this.normalVeteranGap >= this.EPSILON || 
+                   this.normalAutomatedGap < -this.EPSILON || 
+                   this.veteranAutomatedGap < -this.EPSILON || 
+                   this.normalVeteranGap < -this.EPSILON;
+        },
+
         timeCalculations() {
             const normalTime = this.stepTimes.reduce((sum, time) => sum + time, 0);
             
@@ -236,13 +326,11 @@ export default {
         normalVeteranGap() {
             return this.timeCalculations.normalTime - this.timeCalculations.veteranTime;
         },
-        hasAnyResult() {
-            return (
-                (this.normalAutomatedGap >= this.EPSILON || this.veteranAutomatedGap >= this.EPSILON) ||
-                this.normalVeteranGap >= this.EPSILON ||
-                (this.normalAutomatedGap < -this.EPSILON || this.veteranAutomatedGap < -this.EPSILON) ||
-                this.normalVeteranGap < -this.EPSILON
-            );
+        fasterThanAutomationProposals() {
+            return this.veteranProposals;
+        },
+        superUserProposals() {
+            return this.automationProposals;
         },
         yAxisValues() {
             const maxTime = Math.max(
@@ -252,7 +340,7 @@ export default {
             );
             const step = Math.ceil(maxTime / 5); // 5 divisions
             return Array.from({ length: 6 }, (_, i) => step * (5 - i)); // Reverse order for top-to-bottom
-        }
+        },
     },
     methods: {
         isFirstGrayDot(index) {
@@ -359,7 +447,7 @@ export default {
                     restoreState: encodedState
                 }
             });
-        }
+        },
     }
 };
 </script>
@@ -606,34 +694,59 @@ export default {
     gap: 8px;
 }
 
-.result-content {
-    padding: 12px;
-    border-radius: 4px;
+.result-header {
     font-weight: 500;
 }
 
-.result-normal-automated {
-    background-color: #E8F5E9;
-    color: #2E7D32;
-    border-left: 4px solid #4CAF50;
+.automation-header {
+    background-color: #E8F5E9 !important;
+    color: #2E7D32 !important;
 }
 
-.result-normal-veteran {
-    background-color: #FFF3E0;
-    color: #F57C00;
-    border-left: 4px solid #FF9800;
+.veteran-header {
+    background-color: #FFF3E0 !important;
+    color: #E65100 !important;
 }
 
-.result-warning {
-    background-color: #FFEBEE;
-    color: #C62828;
-    border-left: 4px solid #f44336;
+.warning-header {
+    background-color: #FFEBEE !important;
+    color: #C62828 !important;
 }
 
-.result-normal {
-    background-color: #E3F2FD;
-    color: #1565C0;
-    border-left: 4px solid #1976D2;
+.normal-header {
+    background-color: #F5F5F5 !important;
+    color: #424242 !important;
+}
+
+.proposal-content {
+    padding: 12px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    text-align: left;
+}
+
+.proposal-content > div {
+    margin-bottom: 8px;
+    text-align: left;
+    padding-left: 8px;
+}
+
+.proposal-content > div:last-child {
+    margin-bottom: 0;
+}
+
+:deep(.v-expansion-panel-header) {
+    padding: 12px 16px;
+    text-align: left;
+}
+
+:deep(.v-expansion-panel-content__wrap) {
+    padding: 0;
+}
+
+:deep(.v-expansion-panels) {
+    border-radius: 4px;
+    overflow: hidden;
 }
 
 /* 入力フィールドのスタイルを追加 */

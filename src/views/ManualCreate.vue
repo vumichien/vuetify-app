@@ -89,23 +89,29 @@
                         </v-card-title>
                         <v-card-text>
                             <template v-if="isEditing">
-                                <div v-for="group in manualGroups" :key="group.id" class="mb-6">
-                                    <v-text-field
-                                        v-model="group.name"
-                                        label="グループ名"
-                                        outlined
-                                        dense
-                                    ></v-text-field>
-                                    
-                                    <!-- Replace v-textarea with quill editor -->
-                                    <div class="editor-container">
-                                        <quill-editor
-                                            v-model="group.content"
-                                            :options="editorOption"
-                                            @ready="onEditorReady($event)"
-                                        />
+                                <div class="manual-groups">
+                                    <div v-for="group in manualGroups" :key="group.id" class="manual-group mb-6">
+                                        <v-card outlined class="group-card">
+                                            
+                                            <v-card-text>
+                                                <v-text-field
+                                                    v-model="group.name"
+                                                    label="グループ名"
+                                                    outlined
+                                                    dense
+                                                    class="mb-4"
+                                                ></v-text-field>
+                                                
+                                                <div class="editor-container">
+                                                    <quill-editor
+                                                        v-model="group.content"
+                                                        :options="editorOption"
+                                                        @ready="onEditorReady($event)"
+                                                    />
+                                                </div>
+                                            </v-card-text>
+                                        </v-card>
                                     </div>
-                                    <v-divider class="my-4"></v-divider>
                                 </div>
                             </template>
                             <ManualViewer v-else :manual-data="manualData" />
@@ -449,5 +455,68 @@ ${group.steps.map((step, index) => `${index + 1}. ${step} (${group.stepTimes[ind
 
 .editor-container >>> .ql-toolbar {
     background-color: #f5f5f5;
+}
+
+.manual-groups {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.manual-group {
+    background: #fff;
+    border-radius: 8px;
+}
+
+.group-card {
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+}
+
+.group-header {
+    background: #f5f5f5;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.editor-container {
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    min-height: 300px;
+}
+
+/* Increase editor width and adjust styling */
+:deep(.quill-editor) {
+    width: 100%;
+    max-width: none;
+}
+
+:deep(.ql-container) {
+    min-height: 250px;
+    font-size: 14px;
+}
+
+:deep(.ql-editor) {
+    padding: 16px 20px;
+    min-height: 250px;
+}
+
+:deep(.ql-toolbar) {
+    border-bottom: 1px solid #e0e0e0;
+    padding: 8px 16px;
+    background: #f8f9fa;
+}
+
+/* Responsive adjustments */
+@media (min-width: 960px) {
+    .editor-container {
+        min-height: 400px;
+    }
+    
+    :deep(.ql-container) {
+        min-height: 350px;
+    }
+    
+    :deep(.ql-editor) {
+        min-height: 350px;
+    }
 }
 </style>

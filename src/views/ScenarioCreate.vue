@@ -23,7 +23,10 @@
         </v-btn>
 
         <!-- AI Thinking Dialog -->
-        <AIThinking :show.sync="isThinking" />
+        <AIThinking 
+            :show.sync="isThinking" 
+            :text="thinkingText"
+        />
 
         <!-- Flow Title -->
         <div v-if="showSteps" class="flow-title mb-4">
@@ -72,6 +75,9 @@
                             :steps-style="group.stepsStyle"
                             :step-comments="group.stepComments"
                             :step-times="group.stepTimes"
+                            :automation-proposal="group.automationProposal"
+                            :veteran-proposals="group.veteranProposals"
+                            :no-improvement-proposals="group.noImprovementProposals"
                         />
                         <v-tooltip bottom>
                             <template v-slot:activator="{ on, attrs }">
@@ -144,6 +150,7 @@
                 </v-card-title>
                 <v-card-text class="pt-4">
                     <div v-if="selectedManualRef" class="manual-info">
+                        <p><strong>マニュアル：</strong> {{ selectedManualRef.document }}</p>
                         <p><strong>章：</strong> {{ selectedManualRef.chapter }}</p>
                         <p><strong>セクション：</strong> {{ selectedManualRef.section }}</p>
                         <p><strong>項目：</strong> {{ selectedManualRef.item }}</p>
@@ -198,7 +205,8 @@ export default {
             isThinking: false,
             isAnalysisMode: false,
             scenarioGroups: scenarioGroups,
-            scenarioAnalysis: scenarioAnalysis
+            scenarioAnalysis: scenarioAnalysis,
+            thinkingText: 'AI分析中'
         };
     },
 
@@ -226,20 +234,27 @@ export default {
                     console.log('ScenarioCreate - Restoring files:', state.files);
                     // Convert base64 back to File objects
                     const fileObjects = state.files.map(fileData => {
-                        // Convert base64 to blob
-                        const byteString = atob(fileData.data.split(',')[1]);
-                        const ab = new ArrayBuffer(byteString.length);
-                        const ia = new Uint8Array(ab);
-                        for (let i = 0; i < byteString.length; i++) {
-                            ia[i] = byteString.charCodeAt(i);
+                        try {
+                            // Convert base64 to blob
+                            const byteString = atob(fileData.data.split(',')[1]);
+                            const mimeString = fileData.data.split(',')[0].split(':')[1].split(';')[0];
+                            const ab = new ArrayBuffer(byteString.length);
+                            const ia = new Uint8Array(ab);
+                            
+                            for (let i = 0; i < byteString.length; i++) {
+                                ia[i] = byteString.charCodeAt(i);
+                            }
+                            
+                            const blob = new Blob([ab], { type: mimeString });
+                            return new File([blob], fileData.name, {
+                                type: fileData.type,
+                                lastModified: fileData.lastModified
+                            });
+                        } catch (error) {
+                            console.error('Error converting file data:', error);
+                            return null;
                         }
-                        const blob = new Blob([ab], { type: fileData.type });
-                        
-                        return new File([blob], fileData.name, {
-                            type: fileData.type,
-                            lastModified: fileData.lastModified
-                        });
-                    });
+                    }).filter(file => file !== null);
                     
                     this.initialFiles = fileObjects;
                     this.currentFiles = fileObjects;
@@ -276,6 +291,7 @@ export default {
 
     methods: {
         async createScenario() {
+            this.thinkingText = 'AI分析中';
             this.isThinking = true;
             try {
                 await new Promise(resolve => setTimeout(resolve, 2000));
@@ -299,70 +315,91 @@ export default {
             console.log('ScenarioCreate - Files selected:', files);
             this.currentFiles = files;
         },
-        createVeteranManual() {
-            // Collect all veteran steps from all groups with group information
-            const veteranGroups = [];
-            let totalTime = 0;
-            let totalSteps = 0;
+        async createVeteranManual() {
+            this.thinkingText = 'AIマニュアル作成中';
+            this.isThinking = true;
+            try {
+                // Collect all veteran steps from all groups with group information
+                const veteranGroups = [];
+                let totalTime = 0;
+                let totalSteps = 0;
 
-            this.currentGroups.forEach(group => {
-                const groupSteps = [];
-                const groupStepTimes = [];
-                
-                group.steps.forEach((step, index) => {
-                    const isGrayDot = group.stepsStyle[index] === 'gray-dot';
-                    const isFirstGrayDot = isGrayDot && 
-                        group.stepsStyle.findIndex(style => style === 'gray-dot') === index;
+                this.currentGroups.forEach(group => {
+                    const groupSteps = [];
+                    const groupStepTimes = [];
                     
-                    if (!isGrayDot || isFirstGrayDot) {
-                        groupSteps.push(step);
-                        groupStepTimes.push(group.stepTimes[index]);
-                        totalTime += group.stepTimes[index];
-                        totalSteps++;
+                    group.steps.forEach((step, index) => {
+                        const isGrayDot = group.stepsStyle[index] === 'gray-dot';
+                        const isFirstGrayDot = isGrayDot && 
+                            group.stepsStyle.findIndex(style => style === 'gray-dot') === index;
+                        
+                        if (!isGrayDot || isFirstGrayDot) {
+                            groupSteps.push(step);
+                            groupStepTimes.push(group.stepTimes[index]);
+                            totalTime += group.stepTimes[index];
+                            totalSteps++;
+                        }
+                    });
+
+                    if (groupSteps.length > 0) {
+                        veteranGroups.push({
+                            name: group.name,
+                            steps: groupSteps,
+                            stepTimes: groupStepTimes
+                        });
                     }
                 });
 
-                if (groupSteps.length > 0) {
-                    veteranGroups.push({
-                        name: group.name,
-                        steps: groupSteps,
-                        stepTimes: groupStepTimes
-                    });
-                }
-            });
+                const flowData = {
+                    type: 'default',
+                    groups: veteranGroups,
+                    totalTime: totalTime,
+                    totalSteps: totalSteps
+                };
 
-            const flowData = {
-                type: 'default',
-                groups: veteranGroups,
-                totalTime: totalTime,
-                totalSteps: totalSteps
-            };
+                // Save current state
+                const currentState = {
+                    text: this.text,
+                    files: await Promise.all(this.currentFiles.map(async file => {
+                        // Convert File to base64
+                        const base64 = await this.fileToBase64(file);
+                        return {
+                            name: file.name,
+                            size: file.size,
+                            type: file.type,
+                            lastModified: file.lastModified,
+                            data: base64
+                        };
+                    })),
+                    showSteps: true,
+                    isAnalysisMode: this.isAnalysisMode
+                };
 
-            // Save current state
-            const currentState = {
-                text: this.text,
-                files: this.currentFiles.map(file => ({
-                    name: file.name,
-                    size: file.size,
-                    type: file.type,
-                    lastModified: file.lastModified,
-                    // Convert file to base64
-                    data: URL.createObjectURL(file)
-                })),
-                showSteps: true,
-                isAnalysisMode: this.isAnalysisMode
-            };
+                await new Promise(resolve => setTimeout(resolve, 2000));
 
-            // Encode state as URI component
-            const encodedState = encodeURIComponent(JSON.stringify(currentState));
+                const encodedState = encodeURIComponent(JSON.stringify(currentState));
 
-            // Navigate to Manual Create view
-            this.$router.push({
-                name: 'Manual',
-                params: {
-                    flowData: JSON.stringify(flowData),
-                    restoreState: encodedState
-                }
+                this.$router.push({
+                    name: 'Manual',
+                    params: {
+                        flowData: JSON.stringify(flowData),
+                        restoreState: encodedState
+                    }
+                });
+            } catch (error) {
+                console.error('Error creating veteran manual:', error);
+            } finally {
+                this.isThinking = false;
+            }
+        },
+
+        // Helper method to convert File to base64
+        fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
             });
         }
     },

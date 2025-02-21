@@ -14,6 +14,7 @@ export const scenarioGroups = [
             '中身確認'
         ],
         manualRef: {
+            document: '旅費精算システム利用マニュアル.pdf',
             chapter: '第3章：基本操作',
             section: '3.2 ファイル操作',
             item: 'Excelファイルの検索と確認',
@@ -54,6 +55,7 @@ export const scenarioGroups = [
             '決裁システムかを確認する'
         ],
         manualRef: {
+            document: '旅費精算システム利用マニュアル.pdf',
             chapter: '第4章：社内システム',
             section: '4.1 決裁システム',
             item: 'システムへのアクセス方法',
@@ -89,6 +91,7 @@ export const scenarioGroups = [
             "新規起票のページを開く",
         ],
         manualRef: {
+            document: '海外出張費精算ガイド.pdf',
             chapter: '第4章：社内システム',
             section: '4.2 起票処理',
             item: '新規起票画面へのアクセス',
@@ -138,6 +141,7 @@ export const scenarioGroups = [
             "システムを閉じる"
         ],
         manualRef: {
+            document: '海外出張費精算ガイド.pdf',
             chapter: '第4章：社内システム',
             section: '4.2 起票処理',
             item: '申請情報の入力と送信',
