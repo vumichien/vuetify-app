@@ -260,7 +260,7 @@ export default {
     data() {
         return {
             showFlowchart: false,
-            EPSILON: 0.1,
+            EPSILON: 30,
             openPanels: [0, 1, 2, 3, 4], // All panels open by default
         };
     },

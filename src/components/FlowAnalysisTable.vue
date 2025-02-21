@@ -7,129 +7,134 @@
         <v-card-text class="pa-4">
             <div v-for="(groupData, groupName) in analysisData" :key="groupName" class="mb-6">
                 <v-card outlined class="group-analysis-card">
-                    <div class="group-header d-flex align-center px-4 py-3">
+                    <div class="group-header d-flex align-center px-4 py-3" @click="toggleGroup(groupName)" style="cursor: pointer">
                         <h3 class="text-h6 mb-0">{{ groupName }}</h3>
+                        <v-spacer></v-spacer>
+                        <v-icon>{{ expandedGroups[groupName] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
                     </div>
                     
-                    <v-card-text class="pa-4">
-                        <v-row>
-                            <v-col cols="12" md="8">
-                                <v-row>
-                                    <!-- 現状分析 -->
-                                    <v-col cols="12" md="6">
-                                        <v-card outlined class="analysis-card h-100">
-                                            <v-card-title class="subtitle-1 analysis-header py-2">
-                                                <v-icon small left>mdi-magnify</v-icon>
-                                                現状分析
-                                            </v-card-title>
-                                            <v-card-text>
-                                                <div class="analysis-section">
-                                                    <div class="section-title success--text">
-                                                        <v-icon color="success" small left>mdi-check-circle</v-icon>
-                                                        強み
+                    <v-expand-transition>
+                        <v-card-text v-show="expandedGroups[groupName]" class="pa-4">
+                            <v-row>
+                                <v-col cols="12" md="8">
+                                    <v-row>
+                                        <!-- 現状分析 -->
+                                        <v-col cols="12" md="6">
+                                            <v-card outlined class="analysis-card h-100">
+                                                <v-card-title class="subtitle-1 analysis-header py-2">
+                                                    <v-icon small left>mdi-magnify</v-icon>
+                                                    現状分析
+                                                </v-card-title>
+                                                <v-card-text>
+                                                    <div class="analysis-section">
+                                                        <div class="section-title success--text">
+                                                            <v-icon color="success" small left>mdi-check-circle</v-icon>
+                                                            強み
+                                                        </div>
+                                                        <ul class="strength-list">
+                                                            <li v-for="(strength, index) in groupData.normalUserAnalysis.strengths" 
+                                                                :key="'strength-' + index">
+                                                                {{ strength }}
+                                                            </li>
+                                                        </ul>
                                                     </div>
-                                                    <ul class="strength-list">
-                                                        <li v-for="(strength, index) in groupData.normalUserAnalysis.strengths" 
-                                                            :key="'strength-' + index">
-                                                            {{ strength }}
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                                <v-divider class="my-3"></v-divider>
-                                                <div class="analysis-section">
-                                                    <div class="section-title error--text">
-                                                        <v-icon color="error" small left>mdi-alert-circle</v-icon>
-                                                        弱み
+                                                    <v-divider class="my-3"></v-divider>
+                                                    <div class="analysis-section">
+                                                        <div class="section-title error--text">
+                                                            <v-icon color="error" small left>mdi-alert-circle</v-icon>
+                                                            弱み
+                                                        </div>
+                                                        <ul class="weakness-list">
+                                                            <li v-for="(weakness, index) in groupData.normalUserAnalysis.weaknesses" 
+                                                                :key="'weakness-' + index">
+                                                                {{ weakness }}
+                                                            </li>
+                                                        </ul>
                                                     </div>
-                                                    <ul class="weakness-list">
-                                                        <li v-for="(weakness, index) in groupData.normalUserAnalysis.weaknesses" 
-                                                            :key="'weakness-' + index">
-                                                            {{ weakness }}
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </v-card-text>
-                                        </v-card>
-                                    </v-col>
+                                                </v-card-text>
+                                            </v-card>
+                                        </v-col>
 
-                                    <!-- 改善提案 -->
-                                    <v-col cols="12" md="6">
-                                        <v-card outlined class="analysis-card h-100">
-                                            <v-card-title class="subtitle-1 improvement-header py-2">
-                                                <v-icon small left>mdi-lightbulb-on</v-icon>
-                                                改善提案
-                                            </v-card-title>
-                                            <v-card-text>
-                                                <div class="analysis-section">
-                                                    <div class="section-title success--text">
-                                                        <v-icon color="success" small left>mdi-robot</v-icon>
-                                                        自動化ポイント
+                                        <!-- 改善提案 -->
+                                        <v-col cols="12" md="6">
+                                            <v-card outlined class="analysis-card h-100">
+                                                <v-card-title class="subtitle-1 improvement-header py-2">
+                                                    <v-icon small left>mdi-lightbulb-on</v-icon>
+                                                    改善提案
+                                                </v-card-title>
+                                                <v-card-text>
+                                                    <div class="analysis-section">
+                                                        <div class="section-title success--text">
+                                                            <v-icon color="success" small left>mdi-robot</v-icon>
+                                                            自動化ポイント
+                                                        </div>
+                                                        <ul class="automation-list">
+                                                            <li v-for="(point, index) in groupData.normalUserAnalysis.automationPoints" 
+                                                                :key="'auto-' + index">
+                                                                {{ point }}
+                                                            </li>
+                                                        </ul>
                                                     </div>
-                                                    <ul class="automation-list">
-                                                        <li v-for="(point, index) in groupData.normalUserAnalysis.automationPoints" 
-                                                            :key="'auto-' + index">
-                                                            {{ point }}
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                                <v-divider class="my-3"></v-divider>
-                                                <div class="analysis-section">
-                                                    <div class="section-title warning--text">
-                                                        <v-icon color="warning" small left>mdi-account-star</v-icon>
-                                                        ベテラン化ポイント
+                                                    <v-divider class="my-3"></v-divider>
+                                                    <div class="analysis-section">
+                                                        <div class="section-title warning--text">
+                                                            <v-icon color="warning" small left>mdi-account-star</v-icon>
+                                                            ベテラン化ポイント
+                                                        </div>
+                                                        <ul class="veteran-list">
+                                                            <li v-for="(point, index) in groupData.normalUserAnalysis.veteranPoints" 
+                                                                :key="'vet-' + index">
+                                                                {{ point }}
+                                                            </li>
+                                                        </ul>
                                                     </div>
-                                                    <ul class="veteran-list">
-                                                        <li v-for="(point, index) in groupData.normalUserAnalysis.veteranPoints" 
-                                                            :key="'vet-' + index">
-                                                            {{ point }}
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </v-card-text>
-                                        </v-card>
-                                    </v-col>
-                                </v-row>
-                            </v-col>
-                            
-                            <v-col cols="12" md="4">
-                                <v-card outlined class="time-impact-card">
-                                    <v-card-title class="subtitle-1 time-header py-2">
-                                        <v-icon small left>mdi-clock-outline</v-icon>
-                                        時間影響分析
-                                    </v-card-title>
-                                    <v-card-text class="pa-0">
-                                        <v-list dense>
-                                            <v-list-item v-for="(time, operation) in groupData.timeImpact" 
-                                               :key="operation"
-                                               class="time-impact-item">
-                                                <v-list-item-content>
-                                                    <v-list-item-title class="text-body-2 font-weight-medium">
-                                                        {{ getOperationLabel(operation) }}
-                                                    </v-list-item-title>
-                                                    <v-list-item-subtitle class="d-flex align-center mt-1">
-                                                        <v-progress-linear
-                                                            :value="getTimePercentage(time, groupData.timeImpact)"
-                                                            :color="getHeaderClass"
-                                                            height="4"
-                                                            class="flex-grow-1"
-                                                        ></v-progress-linear>
-                                                        <span class="time-value ml-2">{{ time }}秒</span>
-                                                    </v-list-item-subtitle>
-                                                </v-list-item-content>
-                                            </v-list-item>
-                                        </v-list>
-                                    </v-card-text>
-                                    <v-card-actions class="pa-4 grey lighten-4">
-                                        <v-spacer></v-spacer>
-                                        <div class="total-time">
-                                            <span class="text-caption grey--text text--darken-1">合計時間:</span>
-                                            <span class="font-weight-bold ml-2">{{ getTotalTime(groupData.timeImpact) }}秒</span>
-                                        </div>
-                                    </v-card-actions>
-                                </v-card>
-                            </v-col>
-                        </v-row>
-                    </v-card-text>
+                                                </v-card-text>
+                                            </v-card>
+                                        </v-col>
+                                    </v-row>
+                                </v-col>
+                                
+                                <v-col cols="12" md="4">
+                                    <v-card outlined class="time-impact-card">
+                                        <v-card-title class="subtitle-1 time-header py-2">
+                                            <v-icon small left>mdi-clock-outline</v-icon>
+                                            時間影響分析
+                                        </v-card-title>
+                                        <v-card-text class="pa-0">
+                                            <PieChart :timeImpact="groupData.timeImpact" />
+                                            <v-list dense class="compact-list">
+                                                <v-list-item v-for="(time, operation) in groupData.timeImpact" 
+                                                   :key="operation"
+                                                   class="time-impact-item py-1">
+                                                    <v-list-item-content>
+                                                        <v-list-item-title class="text-caption font-weight-medium">
+                                                            {{ getOperationLabel(operation) }}
+                                                        </v-list-item-title>
+                                                        <v-list-item-subtitle class="d-flex align-center mt-1">
+                                                            <v-progress-linear
+                                                                :value="getTimePercentage(time, groupData.timeImpact)"
+                                                                :color="getHeaderClass"
+                                                                height="3"
+                                                                class="flex-grow-1"
+                                                            ></v-progress-linear>
+                                                            <span class="time-value-compact ml-2">{{ time }}秒</span>
+                                                        </v-list-item-subtitle>
+                                                    </v-list-item-content>
+                                                </v-list-item>
+                                            </v-list>
+                                        </v-card-text>
+                                        <v-card-actions class="pa-4 grey lighten-4">
+                                            <v-spacer></v-spacer>
+                                            <div class="total-time">
+                                                <span class="text-caption grey--text text--darken-1">合計時間:</span>
+                                                <span class="font-weight-bold ml-2">{{ getTotalTime(groupData.timeImpact) }}秒</span>
+                                            </div>
+                                        </v-card-actions>
+                                    </v-card>
+                                </v-col>
+                            </v-row>
+                        </v-card-text>
+                    </v-expand-transition>
                 </v-card>
             </div>
         </v-card-text>
@@ -138,14 +143,25 @@
 
 <script>
 import { flowAnalysisData } from '@/data/flowAnalysisData';
+import PieChart from './PieChart.vue';
 
 export default {
     name: 'FlowAnalysisTable',
+    components: {
+        PieChart
+    },
     data() {
         return {
             analysisData: flowAnalysisData,
-            activeTab: 0
+            activeTab: 0,
+            expandedGroups: {} // Track expanded state of each group
         };
+    },
+    created() {
+        // Initialize all groups as expanded
+        Object.keys(this.analysisData).forEach(groupName => {
+            this.$set(this.expandedGroups, groupName, true);
+        });
     },
     computed: {
         getHeaderClass() {
@@ -175,6 +191,9 @@ export default {
         getTimePercentage(time, timeImpact) {
             const total = this.getTotalTime(timeImpact);
             return (time / total) * 100;
+        },
+        toggleGroup(groupName) {
+            this.$set(this.expandedGroups, groupName, !this.expandedGroups[groupName]);
         }
     }
 };
@@ -196,6 +215,12 @@ export default {
 .group-header {
     background: linear-gradient(to right, #f5f5f5, #fafafa);
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    user-select: none; /* Prevent text selection when clicking */
+    transition: background-color 0.2s;
+}
+
+.group-header:hover {
+    background: linear-gradient(to right, #eeeeee, #f5f5f5);
 }
 
 /* Header colors for different sections */
@@ -340,7 +365,7 @@ li:last-child {
 }
 
 .time-impact-item {
-    padding: 16px;
+    padding: 8px 16px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     transition: background-color 0.2s;
 }
@@ -349,13 +374,13 @@ li:last-child {
     background-color: rgba(25, 118, 210, 0.02);
 }
 
-.time-value {
-    font-size: 1rem;
+.time-value-compact {
+    font-size: 0.75rem;
     font-weight: 600;
     color: var(--v-primary-base);
-    min-width: 60px;
+    min-width: 50px;
     text-align: right;
-    padding: 4px 8px;
+    padding: 2px 6px;
     border-radius: 4px;
     background-color: rgba(25, 118, 210, 0.05);
 }
@@ -398,5 +423,10 @@ li:last-child {
 
 .v-card__title {
     transition: background-color 0.3s ease;
+}
+
+.compact-list {
+    max-height: 300px;
+    overflow-y: auto;
 }
 </style> 
