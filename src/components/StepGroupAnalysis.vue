@@ -56,10 +56,16 @@
                             時間分析
                         </v-card-title>
                         <v-card-text>
-                            <TimeComparison 
+                            <TimeComparison
+                                :group-name="groupName"
                                 :steps="steps"
                                 :steps-style="stepsStyle"
                                 :step-times="stepTimes"
+                                :total-steps="steps.length"
+                                :total-time="calculateTotalTime"
+                                :automation-proposal="automationProposal"
+                                :veteran-proposals="veteranProposals"
+                                :no-improvement-proposals="noImprovementProposals"
                             />
                         </v-card-text>
                         <v-card-actions>
@@ -83,6 +89,7 @@
 import TimeComparison from './TimeComparison.vue';
 
 export default {
+    name: 'StepGroupAnalysis',
     components: {
         TimeComparison
     },
@@ -111,6 +118,23 @@ export default {
         stepTimes: {
             type: Array,
             required: true
+        },
+        automationProposal: {
+            type: Array,
+            default: () => []
+        },
+        veteranProposals: {
+            type: Array,
+            default: () => []
+        },
+        noImprovementProposals: {
+            type: Array,
+            default: () => []
+        }
+    },
+    computed: {
+        calculateTotalTime() {
+            return this.stepTimes.reduce((sum, time) => sum + time, 0);
         }
     }
 };

@@ -14,7 +14,7 @@
                 </div>
 
                 <div class="thinking-text mb-6">
-                    AI分析中
+                    {{ text }}
                     <span class="dots">
                         <span>.</span><span>.</span><span>.</span>
                     </span>
@@ -40,6 +40,10 @@ export default {
         show: {
             type: Boolean,
             required: true
+        },
+        text: {
+            type: String,
+            default: 'AI分析中'
         }
     },
     data() {
@@ -217,7 +221,7 @@ export default {
     letter-spacing: 0.5px;
     display: flex;
     align-items: center;
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Meiryo';
 }
 
 .dots {

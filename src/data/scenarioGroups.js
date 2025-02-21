@@ -1,6 +1,6 @@
 export const scenarioGroups = [
     {
-        name: 'Excel探す',
+        name: 'Excel検索',
         steps: [
             'エクスプローラでフォルダ遷移する',
             'エクスプローラでフォルダ遷移する',
@@ -14,6 +14,7 @@ export const scenarioGroups = [
             '中身確認'
         ],
         manualRef: {
+            document: '旅費精算システム利用マニュアル.pdf',
             chapter: '第3章：基本操作',
             section: '3.2 ファイル操作',
             item: 'Excelファイルの検索と確認',
@@ -44,7 +45,7 @@ export const scenarioGroups = [
         }
     },
     {
-        name: '決裁システムを探す',
+        name: '決裁システム検索',
         steps: [
             'ブラウザを起動する',
             '社内サイトを起動する',
@@ -54,6 +55,7 @@ export const scenarioGroups = [
             '決裁システムかを確認する'
         ],
         manualRef: {
+            document: '旅費精算システム利用マニュアル.pdf',
             chapter: '第4章：社内システム',
             section: '4.1 決裁システム',
             item: 'システムへのアクセス方法',
@@ -80,7 +82,7 @@ export const scenarioGroups = [
         }
     },
     {
-        name: '新規起票ページを起こす',
+        name: '新規起票作成',
         steps: [
             "システムにログインする",
             "システム内を遷移する",
@@ -89,6 +91,7 @@ export const scenarioGroups = [
             "新規起票のページを開く",
         ],
         manualRef: {
+            document: '海外出張費精算ガイド.pdf',
             chapter: '第4章：社内システム',
             section: '4.2 起票処理',
             item: '新規起票画面へのアクセス',
@@ -116,7 +119,7 @@ export const scenarioGroups = [
         }
     },
     {
-        name: '新規起票ページに入力',
+        name: '新規起票入力',
         steps: [
             "GUI1の日付を選択",
             "GUI1の日付を選択",
@@ -138,6 +141,7 @@ export const scenarioGroups = [
             "システムを閉じる"
         ],
         manualRef: {
+            document: '海外出張費精算ガイド.pdf',
             chapter: '第4章：社内システム',
             section: '4.2 起票処理',
             item: '申請情報の入力と送信',

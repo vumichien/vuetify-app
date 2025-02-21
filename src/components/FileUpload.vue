@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="file-upload">
     <v-file-input
       v-model="files"
       label="ファイルをアップロード"
@@ -46,23 +46,49 @@
 <script>
 export default {
   name: 'FileUpload',
+  props: {
+    initialFiles: {
+      type: Array,
+      default: () => []
+    }
+  },
   data() {
     return {
       files: [],
       uploadedFiles: []
     }
   },
+  watch: {
+    initialFiles: {
+      immediate: true,
+      handler(newFiles) {
+        console.log('FileUpload - initialFiles changed:', newFiles);
+        if (newFiles && newFiles.length > 0) {
+          this.files = [...newFiles];
+          this.uploadedFiles = [...newFiles];
+          this.handleFiles(newFiles);
+        }
+      }
+    }
+  },
   methods: {
     handleFiles(files) {
+      console.log('FileUpload - handleFiles:', files);
       if (files) {
         this.uploadedFiles = Array.isArray(files) ? files : [files];
-        // 必要に応じてファイルを親コンポーネントに送信
+        this.files = this.uploadedFiles;
         this.$emit('files-selected', this.uploadedFiles);
       } else {
         this.uploadedFiles = [];
+        this.files = [];
       }
+      console.log('FileUpload - Current state:', {
+        files: this.files,
+        uploadedFiles: this.uploadedFiles
+      });
     },
     removeFile(index) {
+      console.log('FileUpload - Removing file at index:', index);
       this.uploadedFiles.splice(index, 1);
       this.files = this.uploadedFiles;
       this.$emit('files-selected', this.uploadedFiles);
@@ -73,7 +99,17 @@ export default {
       const sizes = ['Bytes', 'KB', 'MB', 'GB'];
       const i = Math.floor(Math.log(bytes) / Math.log(k));
       return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    },
+    getFiles() {
+      return this.uploadedFiles;
     }
+  },
+  mounted() {
+    console.log('FileUpload - Component mounted', {
+      files: this.files,
+      uploadedFiles: this.uploadedFiles,
+      initialFiles: this.initialFiles
+    });
   }
 }
 </script>

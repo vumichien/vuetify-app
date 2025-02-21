@@ -6,7 +6,12 @@
             v-model="text"
             class="mb-4"
         ></v-text-field>
-        <FileUpload class="mb-4"/>
+        <FileUpload 
+            ref="fileUpload"
+            :initial-files="initialFiles"
+            @files-selected="handleFilesSelected"
+            class="mb-4"
+        />
         
         <v-btn
             color="#42b883"
@@ -18,7 +23,10 @@
         </v-btn>
 
         <!-- AI Thinking Dialog -->
-        <AIThinking :show.sync="isThinking" />
+        <AIThinking 
+            :show.sync="isThinking" 
+            :text="thinkingText"
+        />
 
         <!-- Flow Title -->
         <div v-if="showSteps" class="flow-title mb-4">
@@ -67,6 +75,9 @@
                             :steps-style="group.stepsStyle"
                             :step-comments="group.stepComments"
                             :step-times="group.stepTimes"
+                            :automation-proposal="group.automationProposal"
+                            :veteran-proposals="group.veteranProposals"
+                            :no-improvement-proposals="group.noImprovementProposals"
                         />
                         <v-tooltip bottom>
                             <template v-slot:activator="{ on, attrs }">
@@ -101,11 +112,25 @@
             <v-btn
                 color="primary"
                 @click="toggleAnalysis"
-                class="mb-6"
+                class="mb-6 mr-4"
             >
                 {{ isAnalysisMode ? '通常表示' : '分析' }}
             </v-btn>
+
+            <!-- Only show manual creation button when not in analysis mode -->
+            <v-btn
+                v-if="isAnalysisMode"
+                color="warning"
+                @click="createVeteranManual"
+                class="mb-6"
+            >
+                <v-icon left>mdi-file-document-outline</v-icon>
+                マニュアル作成
+            </v-btn>
         </div>
+
+        <!-- Flow Analysis Table -->
+        <FlowAnalysisTable v-if="showSteps && isAnalysisMode" />
 
         <!-- Manual Reference Dialog -->
         <v-dialog v-model="showManualDialog" max-width="600">
@@ -125,6 +150,7 @@
                 </v-card-title>
                 <v-card-text class="pt-4">
                     <div v-if="selectedManualRef" class="manual-info">
+                        <p><strong>マニュアル：</strong> {{ selectedManualRef.document }}</p>
                         <p><strong>章：</strong> {{ selectedManualRef.chapter }}</p>
                         <p><strong>セクション：</strong> {{ selectedManualRef.section }}</p>
                         <p><strong>項目：</strong> {{ selectedManualRef.item }}</p>
@@ -155,26 +181,32 @@ import FileUpload from '@/components/FileUpload.vue';
 import StepGroup from '@/components/StepGroup.vue';
 import StepGroupAnalysis from '@/components/StepGroupAnalysis.vue';
 import AIThinking from '@/components/AIThinking.vue';
+import FlowAnalysisTable from '@/components/FlowAnalysisTable.vue';
 import { scenarioGroups } from '@/data/scenarioGroups.js';
 import { scenarioAnalysis } from '@/data/scenarioAnalysis.js';
 
 export default {
+    name: 'ScenarioCreate',
     components: { 
         FileUpload,
         StepGroup,
         StepGroupAnalysis,
-        AIThinking
+        AIThinking,
+        FlowAnalysisTable
     },
     data() {
         return {
             text: '',
+            initialFiles: [],
+            currentFiles: [],
             showSteps: false,
             showManualDialog: false,
             selectedManualRef: null,
             isThinking: false,
             isAnalysisMode: false,
             scenarioGroups: scenarioGroups,
-            scenarioAnalysis: scenarioAnalysis
+            scenarioAnalysis: scenarioAnalysis,
+            thinkingText: 'AI分析中'
         };
     },
 
@@ -187,8 +219,79 @@ export default {
         }
     },
 
+    created() {
+        console.log('ScenarioCreate - Component created');
+        if (this.$route.params.restoreState) {
+            try {
+                const state = JSON.parse(decodeURIComponent(this.$route.params.restoreState));
+                console.log('ScenarioCreate - Restoring state:', state);
+                
+                if (state.text) {
+                    this.text = state.text;
+                }
+                
+                if (state.files && state.files.length > 0) {
+                    console.log('ScenarioCreate - Restoring files:', state.files);
+                    // Convert base64 back to File objects
+                    const fileObjects = state.files.map(fileData => {
+                        try {
+                            // Convert base64 to blob
+                            const byteString = atob(fileData.data.split(',')[1]);
+                            const mimeString = fileData.data.split(',')[0].split(':')[1].split(';')[0];
+                            const ab = new ArrayBuffer(byteString.length);
+                            const ia = new Uint8Array(ab);
+                            
+                            for (let i = 0; i < byteString.length; i++) {
+                                ia[i] = byteString.charCodeAt(i);
+                            }
+                            
+                            const blob = new Blob([ab], { type: mimeString });
+                            return new File([blob], fileData.name, {
+                                type: fileData.type,
+                                lastModified: fileData.lastModified
+                            });
+                        } catch (error) {
+                            console.error('Error converting file data:', error);
+                            return null;
+                        }
+                    }).filter(file => file !== null);
+                    
+                    this.initialFiles = fileObjects;
+                    this.currentFiles = fileObjects;
+                    console.log('ScenarioCreate - Files restored:', this.initialFiles);
+                }
+                
+                if (state.isAnalysisMode) {
+                    this.isAnalysisMode = state.isAnalysisMode;
+                    this.showSteps = true;
+                }
+            } catch (error) {
+                console.error('Error restoring state:', error);
+            }
+        }
+    },
+
+    mounted() {
+        console.log('ScenarioCreate - Component mounted', {
+            text: this.text,
+            initialFiles: this.initialFiles,
+            currentFiles: this.currentFiles,
+            refs: this.$refs
+        });
+    },
+
+    updated() {
+        console.log('ScenarioCreate - Component updated', {
+            text: this.text,
+            initialFiles: this.initialFiles,
+            currentFiles: this.currentFiles,
+            refs: this.$refs
+        });
+    },
+
     methods: {
         async createScenario() {
+            this.thinkingText = 'AI分析中';
             this.isThinking = true;
             try {
                 await new Promise(resolve => setTimeout(resolve, 2000));
@@ -203,6 +306,118 @@ export default {
         },
         toggleAnalysis() {
             this.isAnalysisMode = !this.isAnalysisMode;
+        },
+        expandAnalysis() {
+            // Method to expand the analysis panel
+            // Implementation depends on your component structure
+        },
+        handleFilesSelected(files) {
+            console.log('ScenarioCreate - Files selected:', files);
+            this.currentFiles = files;
+        },
+        async createVeteranManual() {
+            this.thinkingText = 'AIマニュアル作成中';
+            this.isThinking = true;
+            try {
+                // Collect all veteran steps from all groups with group information
+                const veteranGroups = [];
+                let totalTime = 0;
+                let totalSteps = 0;
+
+                this.currentGroups.forEach(group => {
+                    const groupSteps = [];
+                    const groupStepTimes = [];
+                    
+                    group.steps.forEach((step, index) => {
+                        const isGrayDot = group.stepsStyle[index] === 'gray-dot';
+                        const isFirstGrayDot = isGrayDot && 
+                            group.stepsStyle.findIndex(style => style === 'gray-dot') === index;
+                        
+                        if (!isGrayDot || isFirstGrayDot) {
+                            groupSteps.push(step);
+                            groupStepTimes.push(group.stepTimes[index]);
+                            totalTime += group.stepTimes[index];
+                            totalSteps++;
+                        }
+                    });
+
+                    if (groupSteps.length > 0) {
+                        veteranGroups.push({
+                            name: group.name,
+                            steps: groupSteps,
+                            stepTimes: groupStepTimes
+                        });
+                    }
+                });
+
+                const flowData = {
+                    type: 'default',
+                    groups: veteranGroups,
+                    totalTime: totalTime,
+                    totalSteps: totalSteps
+                };
+
+                // Save current state
+                const currentState = {
+                    text: this.text,
+                    files: await Promise.all(this.currentFiles.map(async file => {
+                        // Convert File to base64
+                        const base64 = await this.fileToBase64(file);
+                        return {
+                            name: file.name,
+                            size: file.size,
+                            type: file.type,
+                            lastModified: file.lastModified,
+                            data: base64
+                        };
+                    })),
+                    showSteps: true,
+                    isAnalysisMode: this.isAnalysisMode
+                };
+
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                const encodedState = encodeURIComponent(JSON.stringify(currentState));
+
+                this.$router.push({
+                    name: 'Manual',
+                    params: {
+                        flowData: JSON.stringify(flowData),
+                        restoreState: encodedState
+                    }
+                });
+            } catch (error) {
+                console.error('Error creating veteran manual:', error);
+            } finally {
+                this.isThinking = false;
+            }
+        },
+
+        // Helper method to convert File to base64
+        fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+    },
+    watch: {
+        text(newVal) {
+            console.log('ScenarioCreate - Text changed:', newVal);
+        },
+        currentFiles: {
+            handler(newVal) {
+                console.log('ScenarioCreate - Current files changed:', 
+                    newVal.map(file => ({
+                        name: file.name,
+                        size: file.size,
+                        type: file.type
+                    }))
+                );
+            },
+            deep: true
         }
     }
 };
@@ -219,16 +434,15 @@ export default {
     display: inline-flex;
     align-items: flex-start;
     justify-content: flex-start;
-    gap: 24px;
+    gap: 12px; 
     min-width: min-content;
-    padding: 0 20px;
+    padding: 0 12px;
 }
 
 .group-connector {
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding: 0 12px;
     flex-shrink: 0;
     margin-top: 18px;
 }
@@ -282,6 +496,7 @@ export default {
 
 .group-wrapper {
     position: relative;
+    max-width: 380px;
 }
 
 .info-button {
