@@ -86,7 +86,7 @@
 </template>
 
 <script>
-import TimeComparison from './TimeComparison.vue';
+import TimeComparison from '@/components/TimeComparison.vue';
 
 export default {
     name: 'StepGroupAnalysis',

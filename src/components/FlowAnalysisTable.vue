@@ -154,11 +154,11 @@ export default {
         return {
             analysisData: flowAnalysisData,
             activeTab: 0,
-            expandedGroups: {} // Track expanded state of each group
+            expandedGroups: {} // 各グループの展開状態を追跡
         };
     },
     created() {
-        // Initialize all groups as expanded
+        // すべてのグループを展開
         Object.keys(this.analysisData).forEach(groupName => {
             this.$set(this.expandedGroups, groupName, true);
         });
@@ -215,7 +215,7 @@ export default {
 .group-header {
     background: linear-gradient(to right, #f5f5f5, #fafafa);
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    user-select: none; /* Prevent text selection when clicking */
+    user-select: none; /* クリック時のテキスト選択を防止 */
     transition: background-color 0.2s;
 }
 
@@ -223,7 +223,7 @@ export default {
     background: linear-gradient(to right, #eeeeee, #f5f5f5);
 }
 
-/* Header colors for different sections */
+/* 異なるセクションのヘッダーの色 */
 .analysis-header {
     background-color: #E8EAF6; /* Indigo 50 */
     color: #1A237E; /* Indigo 900 */
@@ -239,7 +239,7 @@ export default {
     color: #3E2723; /* Brown 900 */
 }
 
-/* Adjust icon colors to match headers */
+/* アイコンの色をヘッダーに一致させる */
 .analysis-header .v-icon {
     color: #1A237E !important;
 }
@@ -252,12 +252,12 @@ export default {
     color: #3E2723 !important;
 }
 
-/* Remove the accent line since we're using cards */
+/* アクセントラインを削除します。カードを使用しているため */
 .group-header::before {
     display: none;
 }
 
-/* Adjust spacing between cards */
+/* カード間のスペースを調整 */
 .analysis-card, .time-impact-card {
     margin-bottom: 0;
 }
@@ -329,7 +329,7 @@ li:last-child {
     margin-bottom: 0;
 }
 
-/* Custom list styles with modern bullets */
+/* 現代的なバレットを使用したカスタムリストスタイル */
 .strength-list li, .weakness-list li, 
 .automation-list li, .veteran-list li {
     list-style: none;
@@ -401,7 +401,7 @@ li:last-child {
     transition: width 0.3s ease-out;
 }
 
-/* Responsive adjustments */
+/* レスポンシブな調整 */
 @media (max-width: 960px) {
     .group-analysis {
         padding-bottom: 24px;
@@ -412,7 +412,7 @@ li:last-child {
     }
 }
 
-/* Animation for hover effects */
+/* ホバー効果のアニメーション */
 .analysis-card, .time-impact-card {
     transition: all 0.3s ease;
 }

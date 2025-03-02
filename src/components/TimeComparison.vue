@@ -2,7 +2,7 @@
     <v-card class="time-comparison pa-4">
         <h3 class="text-h6 mb-4 text-center">操作時間の比較</h3>
         
-        <!-- Bar Chart Section -->
+        <!-- バーのグラフ -->
         <div class="chart-section mb-4">
             <div class="chart-container">
                 <TimeBarChart
@@ -13,7 +13,7 @@
             </div>
         </div>
 
-        <!-- Toggle Flowchart Button -->
+        <!-- フローチャートボタン -->
         <div class="text-center mb-4">
             <v-btn
                 elevation="2"
@@ -30,7 +30,7 @@
             </v-btn>
         </div>
 
-        <!-- Flowchart Section -->
+        <!-- フローチャート -->
         <v-expand-transition>
             <div v-show="showFlowchart" class="flows-container mb-4">
                 <!-- 通常のフロー -->
@@ -261,7 +261,7 @@ export default {
         return {
             showFlowchart: false,
             EPSILON: 30,
-            openPanels: [0, 1, 2, 3, 4], // All panels open by default
+            openPanels: [0, 1, 2, 3, 4], // デフォルトですべてのパネルが開いています
         };
     },
 
@@ -338,8 +338,8 @@ export default {
                 this.timeCalculations.automatedTime,
                 this.timeCalculations.veteranTime
             );
-            const step = Math.ceil(maxTime / 5); // 5 divisions
-            return Array.from({ length: 6 }, (_, i) => step * (5 - i)); // Reverse order for top-to-bottom
+            const step = Math.ceil(maxTime / 5);
+            return Array.from({ length: 6 }, (_, i) => step * (5 - i)); // 上から下への逆順
         },
     },
     methods: {
@@ -365,10 +365,10 @@ export default {
         },
         getNormalizedHeight(value) {
             const maxValue = Math.max(...this.yAxisValues);
-            return (value / maxValue) * 80; // 80% of container height
+            return (value / maxValue) * 80;
         },
         async createManual(type) {
-            // Filter out skipped steps
+            // 省略されたステップを除外
             const activeSteps = this.steps.filter((_, index) => {
                 if (type === 'automated') {
                     return this.stepsStyle[index] !== 'gray-dot';
@@ -397,18 +397,18 @@ export default {
                 totalSteps: activeSteps.length
             };
             
-            // Tìm ScenarioCreate component
+            // ScenarioCreateコンポーネントを見つける
             let scenarioCreateComponent = this.$parent;
             while (scenarioCreateComponent && scenarioCreateComponent.$options.name !== 'ScenarioCreate') {
                 scenarioCreateComponent = scenarioCreateComponent.$parent;
             }
             
             if (!scenarioCreateComponent) {
-                console.error('Could not find ScenarioCreate component');
+                console.error('ScenarioCreateコンポーネントが見つかりません');
                 return;
             }
 
-            // Convert files to base64
+            // base64に変換
             const files = await Promise.all(
                 scenarioCreateComponent.currentFiles.map(file => 
                     new Promise((resolve, reject) => {
@@ -435,10 +435,10 @@ export default {
                 isAnalysisMode: true
             };
 
-            // Encode state as URI component
+            // URIコンポーネントとして状態をエンコード
             const encodedState = encodeURIComponent(JSON.stringify(currentState));
             
-            console.log('TimeComparison - Saving state:', currentState);
+            // console.log('TimeComparison - 状態を保存:', currentState);
             
             this.$router.push({
                 name: 'Manual',
@@ -547,7 +547,7 @@ export default {
     border-color: #9e9e9e;
 }
 
-/* Normal Flow */
+/* 通常のフロー */
 .flow-column:nth-child(1) {
     .flow-header {
         border-bottom-color: #1976D2;
@@ -570,7 +570,7 @@ export default {
     }
 }
 
-/* Automated Flow */
+/* 自動化されたフロー */
 .flow-column:nth-child(2) {
     .flow-header {
         border-bottom-color: #4CAF50;
@@ -593,7 +593,7 @@ export default {
     }
 }
 
-/* Veteran Flow */
+/* ベテランフロー */
 .flow-column:nth-child(3) {
     .flow-header {
         border-bottom-color: #FF9800;
@@ -629,7 +629,7 @@ export default {
 .slider-container {
     max-width: 500px;
     margin: 0 auto;
-    padding: 0 12px; /* Add padding for the buttons */
+    padding: 0 12px;
 }
 
 .slider-label {
@@ -769,7 +769,7 @@ export default {
     border-radius: 8px;
 }
 
-/* Smooth transition for flowchart */
+/* フローチャートのスムーズな遷移 */
 .flows-container {
     transition: all 0.3s ease;
 }
@@ -782,17 +782,17 @@ export default {
     font-weight: 500;
 }
 
-/* Normal Flow */
+/* 通常のフロー */
 .flow-column:nth-child(1) .manual-button {
     background-color: #1976D2 !important;
 }
 
-/* Automated Flow */
+/* 自動化されたフロー */
 .flow-column:nth-child(2) .manual-button {
     background-color: #4CAF50 !important;
 }
 
-/* Veteran Flow */
+/* ベテランフロー */
 .flow-column:nth-child(3) .manual-button {
     background-color: #FF9800 !important;
 }
@@ -801,7 +801,7 @@ export default {
     opacity: 0.9;
 }
 
-/* Remove old button container styles */
+/* 古いボタンコンテナのスタイルを削除 */
 .manual-button-container {
     display: none;
 }
@@ -830,7 +830,7 @@ export default {
     transform: translateY(showFlowchart ? -2px : 2px);
 }
 
-/* Thêm animation cho icon */
+/* アイコンのアニメーションを追加 */
 @keyframes bounce {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(3px); }

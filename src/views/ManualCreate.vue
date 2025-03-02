@@ -7,71 +7,10 @@
             </v-card-title>
 
             <v-card-text class="pa-6">
-                <!-- Flow Summary - Only show if restoring state -->
+                <!-- フローのサマリー -->
                 <template v-if="restoreState">
-                    <div class="flow-summary mb-4">
-                        <v-chip class="mr-4" :color="getTitleColor" outlined>
-                            <v-icon left>mdi-clock-outline</v-icon>
-                            合計時間: {{ flowData?.totalTime || 0 }}秒
-                        </v-chip>
-                        <v-chip class="mr-4" :color="getTitleColor" outlined>
-                            <v-icon left>mdi-format-list-numbered</v-icon>
-                            ステップ数: {{ flowData?.totalSteps || 0 }}
-                        </v-chip>
-                    </div>
 
-                    <!-- Flow Groups -->
-                    <v-expansion-panels class="mb-6">
-                        <v-expansion-panel
-                            v-for="(group, groupIndex) in flowData?.groups"
-                            :key="groupIndex"
-                        >
-                            <v-expansion-panel-header>
-                                <div class="d-flex align-center">
-                                    <v-icon left :color="getTitleColor">mdi-folder-outline</v-icon>
-                                    {{ group.name }}
-                                    <v-chip 
-                                        class="ml-4" 
-                                        small 
-                                        outlined 
-                                        :color="getTitleColor"
-                                    >
-                                        {{ group.steps.length }}ステップ
-                                    </v-chip>
-                                </div>
-                            </v-expansion-panel-header>
-                            <v-expansion-panel-content>
-                                <div class="timeline-container">
-                                    <v-timeline dense>
-                                        <v-timeline-item
-                                            v-for="(step, stepIndex) in group.steps"
-                                            :key="`${groupIndex}-${stepIndex}`"
-                                            :color="getTitleColor"
-                                            small
-                                        >
-                                            <div class="d-flex justify-space-between align-center">
-                                                <div class="step-content">
-                                                    <strong class="text-subtitle-1">ステップ {{ stepIndex + 1 }}</strong>
-                                                    <div class="text-body-1 mt-1">{{ step }}</div>
-                                                </div>
-                                                <v-chip 
-                                                    medium 
-                                                    outlined 
-                                                    :color="getTitleColor"
-                                                    class="time-chip"
-                                                >
-                                                    <span class="text-h6">{{ group.stepTimes[stepIndex] }}</span>
-                                                    <span class="text-caption ml-1">秒</span>
-                                                </v-chip>
-                                            </div>
-                                        </v-timeline-item>
-                                    </v-timeline>
-                                </div>
-                            </v-expansion-panel-content>
-                        </v-expansion-panel>
-                    </v-expansion-panels>
-
-                    <!-- Manual Preview with Edit Feature -->
+                    <!-- マニュアルプレビュー -->
                     <v-card outlined v-if="restoreState">
                         <v-card-title class="subtitle-1 d-flex justify-space-between align-center">
                             <div>
@@ -119,7 +58,7 @@
                     </v-card>
                 </template>
 
-                <!-- Manual Content - Only show if not restoring state -->
+                <!-- マニュアルの内容 -->
                 <template v-if="!restoreState">
                     <v-text-field
                         label="マニュアルの内容を入力してください"
@@ -236,7 +175,7 @@ export default {
         }
     },
     created() {
-        // Convert markdown to HTML for editor
+        // マークダウンをHTMLに変換してエディタに表示
         this.manualGroups = manualContent.groups.map((group, index) => ({
             id: this.generateId(group.name || 'group', index),
             name: group.name,
@@ -275,7 +214,7 @@ export default {
                 .toLowerCase()
                 .replace(/[^a-z0-9]+/g, '-')
                 .replace(/(^-|-$)/g, '');
-            return `${sanitizedName}-${index}-${timestamp}`; // Add index to ID
+            return `${sanitizedName}-${index}-${timestamp}`; // IDにインデックスを追加
         },
         generateInitialContent(group) {
             return `# ${group.name}
@@ -295,13 +234,13 @@ ${group.steps.map((step, index) => `${index + 1}. ${step} (${group.stepTimes[ind
         async createManual() {
             this.saving = true;
             try {
-                // Generate HTML content
+                // HTMLコンテンツを生成
                 const htmlContent = this.generateHTML();
                 
-                // Create and download file
+                // ファイルを作成してダウンロード
                 await this.downloadManual(htmlContent);
                 
-                // Show success message
+                // 成功メッセージを表示
                 this.$emit('success', 'マニュアルが作成されました');
             } catch (error) {
                 console.error('Manual creation failed:', error);
@@ -314,8 +253,8 @@ ${group.steps.map((step, index) => `${index + 1}. ${step} (${group.stepTimes[ind
             return marked(markdown);
         },
         onEditorReady(editor) {
-            // You can do something when editor is ready
-            console.log('Editor is ready!', editor);
+            // エディタが準備完了したときに何かをする
+            console.log('エディタが準備完了!', editor);
         },
         generateHTML() {
             const template = `
@@ -373,7 +312,7 @@ ${group.steps.map((step, index) => `${index + 1}. ${step} (${group.stepTimes[ind
             return template;
         },
         async downloadManual(htmlContent) {
-            // Create blob and download
+            // ブロブを作成してダウンロード
             const blob = new Blob([htmlContent], { type: 'text/html' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -483,7 +422,7 @@ ${group.steps.map((step, index) => `${index + 1}. ${step} (${group.stepTimes[ind
     min-height: 300px;
 }
 
-/* Increase editor width and adjust styling */
+/* エディタの幅を増やしてスタイリングを調整 */
 :deep(.quill-editor) {
     width: 100%;
     max-width: none;
@@ -505,7 +444,7 @@ ${group.steps.map((step, index) => `${index + 1}. ${step} (${group.stepTimes[ind
     background: #f8f9fa;
 }
 
-/* Responsive adjustments */
+/* レスポンシブな調整 */
 @media (min-width: 960px) {
     .editor-container {
         min-height: 400px;
