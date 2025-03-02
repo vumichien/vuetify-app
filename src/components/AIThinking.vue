@@ -117,8 +117,8 @@ export default {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 60px 40px; /* Tăng padding dọc */
-    min-height: 300px; /* Thêm chiều cao tối thiểu */
+    padding: 60px 40px;
+    min-height: 300px;
 }
 
 .progress-section {
@@ -128,7 +128,7 @@ export default {
 
 .progress-bar-wrapper {
     width: 100%;
-    height: 8px; /* Tăng chiều cao của progress bar */
+    height: 8px;
     background: rgba(66, 184, 131, 0.1);
     border-radius: 4px;
     overflow: hidden;
@@ -148,20 +148,20 @@ export default {
     position: absolute;
     width: 100%;
     text-align: center;
-    margin-top: 12px; /* Tăng khoảng cách với progress bar */
-    font-size: 1.1rem; /* Tăng kích thước font */
+    margin-top: 12px;
+    font-size: 1.1rem;
     color: #2c3e50;
     font-weight: 500;
 }
 
 .ai-icon-wrapper {
     position: relative;
-    width: 96px; /* Tăng kích thước wrapper */
+    width: 96px; 
     height: 96px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 40px; /* Tăng khoảng cách với progress section */
+    margin-bottom: 40px;
 }
 
 .ai-icon {
@@ -192,7 +192,7 @@ export default {
         transform: translateY(0px);
     }
     50% {
-        transform: translateY(-8px); /* Tăng độ nổi */
+        transform: translateY(-8px);
     }
     100% {
         transform: translateY(0px);

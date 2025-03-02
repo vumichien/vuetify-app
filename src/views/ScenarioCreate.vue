@@ -22,20 +22,20 @@
             作成
         </v-btn>
 
-        <!-- AI Thinking Dialog -->
+        <!-- AI思考ダイアログ -->
         <AIThinking 
             :show.sync="isThinking" 
             :text="thinkingText"
         />
 
-        <!-- Flow Title -->
+        <!-- フロータイトル -->
         <div v-if="showSteps" class="flow-title mb-4">
             <h2 class="text-h5 font-weight-medium text-center">
                 {{ isAnalysisMode ? '分析後のフロー' : 'アップロードされたフロー' }}
             </h2>
         </div>
 
-        <!-- Analysis Legend -->
+        <!-- 分析の凡例 -->
         <div v-if="showSteps && isAnalysisMode" class="legend-container mb-4">
             <div class="legend-title mb-2">操作の分析について</div>
             <div class="legend-items">
@@ -62,7 +62,7 @@
             </div>
         </div>
 
-        <!-- Scrollable container for groups -->
+        <!-- グループのスクロール可能なコンテナ -->
         <div class="groups-scroll-container" v-if="showSteps">
             <div class="groups-container">
                 <template v-for="(group, index) in currentGroups">
@@ -107,7 +107,7 @@
             </div>
         </div>
 
-        <!-- Analysis Button -->
+        <!-- 分析ボタン -->
         <div v-if="showSteps" class="text-center mt-6">
             <v-btn
                 color="primary"
@@ -117,7 +117,7 @@
                 {{ isAnalysisMode ? '通常表示' : '分析' }}
             </v-btn>
 
-            <!-- Only show manual creation button when not in analysis mode -->
+            <!-- 分析モードでない場合にのみマニュアル作成ボタンを表示 -->
             <v-btn
                 v-if="isAnalysisMode"
                 color="warning"
@@ -129,10 +129,10 @@
             </v-btn>
         </div>
 
-        <!-- Flow Analysis Table -->
-        <FlowAnalysisTable v-if="showSteps && isAnalysisMode" />
+        <!-- フロー分析テーブル -->
+        <!-- <FlowAnalysisTable v-if="showSteps && isAnalysisMode" /> -->
 
-        <!-- Manual Reference Dialog -->
+        <!-- マニュアル参照ダイアログ -->
         <v-dialog v-model="showManualDialog" max-width="600">
             <v-card>
                 <v-card-title class="manual-dialog-header">
@@ -232,10 +232,10 @@ export default {
                 
                 if (state.files && state.files.length > 0) {
                     console.log('ScenarioCreate - Restoring files:', state.files);
-                    // Convert base64 back to File objects
+                    // base64をFileオブジェクトに戻す
                     const fileObjects = state.files.map(fileData => {
                         try {
-                            // Convert base64 to blob
+                            // base64をブロブに変換
                             const byteString = atob(fileData.data.split(',')[1]);
                             const mimeString = fileData.data.split(',')[0].split(':')[1].split(';')[0];
                             const ab = new ArrayBuffer(byteString.length);
@@ -308,8 +308,8 @@ export default {
             this.isAnalysisMode = !this.isAnalysisMode;
         },
         expandAnalysis() {
-            // Method to expand the analysis panel
-            // Implementation depends on your component structure
+            // 分析パネルを展開するメソッド
+            // このメソッドは、コンポーネントの構造に依存します
         },
         handleFilesSelected(files) {
             console.log('ScenarioCreate - Files selected:', files);
@@ -319,7 +319,7 @@ export default {
             this.thinkingText = 'AIマニュアル作成中';
             this.isThinking = true;
             try {
-                // Collect all veteran steps from all groups with group information
+                // すべてのグループからすべてのベテランステップを収集し、グループ情報を含める
                 const veteranGroups = [];
                 let totalTime = 0;
                 let totalSteps = 0;
@@ -357,11 +357,11 @@ export default {
                     totalSteps: totalSteps
                 };
 
-                // Save current state
+                // 現在の状態を保存
                 const currentState = {
                     text: this.text,
                     files: await Promise.all(this.currentFiles.map(async file => {
-                        // Convert File to base64
+                        // Fileをbase64に変換
                         const base64 = await this.fileToBase64(file);
                         return {
                             name: file.name,
@@ -393,7 +393,7 @@ export default {
             }
         },
 
-        // Helper method to convert File to base64
+        // Fileをbase64に変換するヘルパーメソッド
         fileToBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -447,29 +447,29 @@ export default {
     margin-top: 18px;
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
+/* Chrome、Safari、Operaのスクロールバーを非表示にする */
 .groups-scroll-container::-webkit-scrollbar {
     height: 8px;
 }
 
-/* Track */
+/* トラック */
 .groups-scroll-container::-webkit-scrollbar-track {
     background: #f1f1f1;
     border-radius: 4px;
 }
 
-/* Handle */
+/* ハンドル */
 .groups-scroll-container::-webkit-scrollbar-thumb {
     background: #888;
     border-radius: 4px;
 }
 
-/* Handle on hover */
+/* ハンドルのホバー時 */
 .groups-scroll-container::-webkit-scrollbar-thumb:hover {
     background: #666;
 }
 
-/* Panel styles for expansion panels */
+/* 展開パネルのスタイル */
 :deep(.v-expansion-panel) {
     border: 1px solid rgba(0, 0, 0, 0.12);
 }
@@ -587,7 +587,7 @@ export default {
     flex-shrink: 0;
 }
 
-/* Analysis styles */
+/* 分析のスタイル */
 .legend-box.gray-dot {
     background-color: #e0e0e0;
     border: 2px dashed #1976D2;

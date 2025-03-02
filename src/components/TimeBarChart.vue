@@ -53,7 +53,7 @@ export default {
             display: false
           },
           tooltip: {
-            enabled: false  // Disable tooltips since we're showing values
+            enabled: false  // 値を表示しているのでツールチップを無効にする
           },
           datalabels: {
             anchor: 'end',

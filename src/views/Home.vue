@@ -1,6 +1,6 @@
 <template>
     <v-container fluid class="home-container pa-0">
-        <!-- Welcome Section -->
+        <!-- ヘッダー -->
         <v-row no-gutters class="welcome-section">
             <v-col cols="12">
                 <div class="welcome-content text-center">
@@ -12,7 +12,7 @@
             </v-col>
         </v-row>
 
-        <!-- Main Features -->
+        <!-- 機能紹介 -->
         <v-row class="features-section mx-4">
             <v-col cols="12" md="4" class="pa-4">
                 <v-card class="feature-card" elevation="2">
@@ -93,7 +93,7 @@
             </v-col>
         </v-row>
 
-        <!-- Statistics Section -->
+        <!-- 統計情報 -->
         <v-row class="stats-section mx-4 mt-8">
             <v-col cols="12" md="4" class="text-center">
                 <div class="stat-item">

@@ -1,7 +1,7 @@
 <template>
     <v-container fluid class="manual-viewer">
         <v-row>
-            <!-- Left sidebar menu -->
+            <!-- 左側のサイドバー -->
             <v-col cols="3" class="menu-sidebar">
                 <v-card flat>
                     <v-list shaped>
@@ -27,7 +27,7 @@
                 </v-card>
             </v-col>
 
-            <!-- Right content area -->
+            <!-- 右側のコンテンツエリア -->
             <v-col cols="9" class="content-area">
                 <v-card flat>
                     <v-card-title class="text-h4 mb-4">
